@@ -99,26 +99,15 @@
 
                     <div class="card border-0 shadow-sm mb-3 {{ $is_berjalan ? 'bg-light border-start border-success border-4' : 'border-start border-secondary border-4' }}">
                         <div class="card-body d-flex justify-content-between align-items-center">
-                         <div>
-    <h5 class="fw-bold mb-1">
-        {{ $ujian->mapel->nama_mapel ?? 'Mapel Tidak Diketahui' }}
-        {{ $ujian->judul_ujian != '-' ? '- ' . $ujian->judul_ujian : '' }}
-    </h5>
-
-  <p class="mb-0 text-muted small">
-    <i class="fas fa-calendar-alt me-1"></i>
-    {{ \Carbon\Carbon::parse($ujian->tanggal_ujian)->translatedFormat('d F Y') }}
-    <br>
-    <i class="fas fa-clock me-1"></i>
-    Waktu Ujian:
-    <strong>
-        {{ \Carbon\Carbon::parse($ujian->waktu_mulai)->format('H:i') }}
-        -
-        {{ \Carbon\Carbon::parse($ujian->waktu_selesai)->format('H:i') }}
-    </strong>
-    WIB
-</p>
-</div>
+                            <div>
+                                <h5 class="fw-bold">{{ $ujian->mapel->nama_mapel ?? 'Mapel Tidak Diketahui' }} {{ $ujian->judul_ujian != '-' ? '- ' . $ujian->judul_ujian : '' }}</h5>
+                                <p class="mb-0 text-muted small">
+                                    <i class="fas fa-calendar-alt text-info me-1"></i> {{ $mulai->isoFormat('dddd, D MMMM YYYY') }}
+                                    <span class="ms-2">
+                                        <i class="fas fa-clock text-warning me-1"></i> {{ $mulai->format('H:i') }} - {{ $selesai->format('H:i') }} WIB
+                                    </span>
+                                </p>
+                            </div>
                             
                             {{-- LOGIKA TOMBOL DINAMIS --}}
                             @if($sudah_mengerjakan)
