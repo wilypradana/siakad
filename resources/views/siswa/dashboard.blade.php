@@ -99,12 +99,23 @@
 
                     <div class="card border-0 shadow-sm mb-3 {{ $is_berjalan ? 'bg-light border-start border-success border-4' : 'border-start border-secondary border-4' }}">
                         <div class="card-body d-flex justify-content-between align-items-center">
-                            <div>
-                                <h5 class="fw-bold">{{ $ujian->mapel->nama_mapel ?? 'Mapel Tidak Diketahui' }} {{ $ujian->judul_ujian != '-' ? '- ' . $ujian->judul_ujian : '' }}</h5>
-                                <p class="mb-0 text-muted small">
-                                    <i class="fas fa-clock me-1"></i> {{ $mulai->format('H:i') }} - {{ $selesai->format('H:i') }} WIB
-                                </p>
-                            </div>
+                         <div>
+    <h5 class="fw-bold mb-1">
+        {{ $ujian->mapel->nama_mapel ?? 'Mapel Tidak Diketahui' }}
+        {{ $ujian->judul_ujian != '-' ? '- ' . $ujian->judul_ujian : '' }}
+    </h5>
+
+    <p class="mb-0 text-muted small">
+        <i class="fas fa-clock me-1"></i>
+        Waktu Ujian:
+        <strong>
+            {{ \Carbon\Carbon::parse($ujian->waktu_mulai)->format('H:i') }}
+            -
+            {{ \Carbon\Carbon::parse($ujian->waktu_selesai)->format('H:i') }}
+        </strong>
+        WIB
+    </p>
+</div>
                             
                             {{-- LOGIKA TOMBOL DINAMIS --}}
                             @if($sudah_mengerjakan)
