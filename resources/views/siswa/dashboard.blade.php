@@ -105,16 +105,19 @@
         {{ $ujian->judul_ujian != '-' ? '- ' . $ujian->judul_ujian : '' }}
     </h5>
 
-    <p class="mb-0 text-muted small">
-        <i class="fas fa-clock me-1"></i>
-        Waktu Ujian:
-        <strong>
-            {{ \Carbon\Carbon::parse($ujian->waktu_mulai)->format('H:i') }}
-            -
-            {{ \Carbon\Carbon::parse($ujian->waktu_selesai)->format('H:i') }}
-        </strong>
-        WIB
-    </p>
+  <p class="mb-0 text-muted small">
+    <i class="fas fa-calendar-alt me-1"></i>
+    {{ \Carbon\Carbon::parse($ujian->tanggal_ujian)->translatedFormat('d F Y') }}
+    <br>
+    <i class="fas fa-clock me-1"></i>
+    Waktu Ujian:
+    <strong>
+        {{ \Carbon\Carbon::parse($ujian->waktu_mulai)->format('H:i') }}
+        -
+        {{ \Carbon\Carbon::parse($ujian->waktu_selesai)->format('H:i') }}
+    </strong>
+    WIB
+</p>
 </div>
                             
                             {{-- LOGIKA TOMBOL DINAMIS --}}
