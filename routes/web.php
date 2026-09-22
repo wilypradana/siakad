@@ -57,12 +57,15 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::delete('/kelas/{id}', [KelasController::class, 'destroy'])->name('admin.kelas.destroy');
 
     // Jadwal
+    Route::get('/jadwal/get-guru', [JadwalController::class, 'getGuruByMapel'])->name('jadwal.get_guru');
+    Route::get('/jadwal/get-kelas', [JadwalController::class, 'getKelasByGuru'])->name('jadwal.get_kelas');
     Route::get('/jadwal', [JadwalController::class, 'index'])->name('admin.jadwal.index');
     Route::post('/jadwal', [JadwalController::class, 'store'])->name('jadwal.store');
     Route::get('/jadwal/export', [JadwalController::class, 'export'])->name('jadwal.export');
     Route::post('/jadwal/import', [JadwalController::class, 'import'])->name('jadwal.import');
     Route::put('/jadwal/{id}', [JadwalController::class, 'update'])->name('jadwal.update');
     Route::delete('/jadwal/{id}', [JadwalController::class, 'destroy'])->name('jadwal.destroy');
+
 
     // Set Pembelajaran
     Route::get('/pembelajaran', [PembelajaranController::class, 'index'])->name('pembelajaran.index');
