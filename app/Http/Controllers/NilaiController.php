@@ -7,17 +7,38 @@ use App\Models\Nilai;
 use App\Models\Siswa;
 use App\Models\Mapel;
 use App\Models\JenisUjian;
+use App\Models\Kelas; // Tambahkan model Kelas
 
 class NilaiController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $data_nilai = Nilai::with(['siswa', 'mapel', 'jenisUjian'])->get();
         $data_siswa = Siswa::all();
         $data_mapel = Mapel::all();
         $data_jenis = JenisUjian::all();
+        $data_kelas = Kelas::all(); 
 
-        return view('admin.nilai.index', compact('data_nilai', 'data_siswa', 'data_mapel', 'data_jenis'));
+        // Hanya proses pencarian jika admin sudah memilih filter
+        if ($request->filled('kelas_id') || $request->filled('mapel_id')) {
+            $query = Nilai::with(['siswa', 'mapel', 'jenisUjian']);
+
+            if ($request->filled('kelas_id')) {
+                $query->whereHas('siswa', function($q) use ($request) {
+                    $q->where('kelas_id', $request->kelas_id);
+                });
+            }
+
+            if ($request->filled('mapel_id')) {
+                $query->where('mapel_id', $request->mapel_id);
+            }
+
+            $data_nilai = $query->get();
+        } else {
+            // Kosongkan data jika halaman baru saja dibuka
+            $data_nilai = collect(); 
+        }
+
+        return view('admin.nilai.index', compact('data_nilai', 'data_siswa', 'data_mapel', 'data_jenis', 'data_kelas'));
     }
 
     public function store(Request $request)
