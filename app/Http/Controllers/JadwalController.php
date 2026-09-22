@@ -7,6 +7,7 @@ use App\Models\Jadwal;
 use App\Models\Kelas;
 use App\Models\Mapel;
 use App\Models\Guru;
+use Illuminate\Support\Facades\DB;
 
 class JadwalController extends Controller
 {
@@ -167,5 +168,38 @@ class JadwalController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    // Mengambil Guru berdasarkan Mapel
+    public function getGuruByMapel(Request $request)
+    {
+        $gurus = DB::table('pembelajarans')
+            ->join('gurus', 'pembelajarans.guru_id', '=', 'gurus.id')
+            ->where('pembelajarans.mapel_id', $request->mapel_id)
+            ->select('gurus.id', 'gurus.nama')
+            ->distinct()
+            ->get();
+            
+        return response()->json($gurus);
+    }
+
+    // Mengambil Kelas berdasarkan Mapel dan Guru
+    public function getKelasByGuru(Request $request)
+    {
+        try {
+            $kelas = DB::table('pembelajarans')
+                ->join('kelas', 'pembelajarans.kelas_id', '=', 'kelas.id')
+                ->where('pembelajarans.mapel_id', $request->mapel_id)
+                ->where('pembelajarans.guru_id', $request->guru_id)
+                ->select('kelas.id', 'kelas.nama_kelas')
+                ->distinct()
+                ->orderBy('kelas.nama_kelas', 'asc')
+                ->get();
+                
+            return response()->json($kelas);
+            
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }
