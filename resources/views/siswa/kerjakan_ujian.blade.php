@@ -70,7 +70,7 @@
 <script>
     @if(session()->has('ujian_verified_' . $ujian->id))
     let cheatCount = 0;
-    const maxCheat = 2; 
+    const maxCheat = 3; 
     let isWarningOpen = false; // Mencegah alert bertumpuk
 
     // 1. Siapkan Suara Alarm (Menggunakan file sirine publik atau ganti dengan file mp3 di folder public Anda)
