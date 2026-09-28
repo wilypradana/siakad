@@ -266,7 +266,7 @@ class UjianController extends Controller
     {
         $ujian = \App\Models\Ujian::findOrFail($ujian_id);
         $siswas = \App\Models\Siswa::where('kelas_id', $ujian->kelas_id)->get();
-        $total_soal = \App\Models\Soal::where('ujian_id', $ujian_id)->count();
+$total_soal = $ujian->soals()->count();
         $hitung_ditutup = 0;
 
         if ($ujian->metode_ujian == 'cbt' && $total_soal > 0) {

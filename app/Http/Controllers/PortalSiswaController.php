@@ -93,7 +93,7 @@ class PortalSiswaController extends Controller
         // 1. JIKA UJIAN MENGGUNAKAN METODE CBT LOKAL
         if ($ujian->metode_ujian == 'cbt') {
             $total_soal = \App\Models\Soal::where('ujian_id', $id)->count();
-            
+            $total_soal = $ujian->soals()->count();
             if ($total_soal > 0) {
                 $jumlah_benar = \App\Models\JawabanSiswa::where('ujian_id', $id)
                                     ->where('siswa_id', $siswa->id)
@@ -192,20 +192,20 @@ class PortalSiswaController extends Controller
     public function getSoalCBT($ujian_id)
     {
         // Pastikan keamanan: Cek apakah siswa sudah verifikasi token ujian ini
-        if (!session()->has('ujian_verified_' . $ujian_id)) {
+    if (!session()->has('ujian_verified_' . $ujian_id)) {
             return response()->json(['error' => 'Akses ditolak.'], 403);
         }
 
         $siswa = \App\Models\Siswa::where('user_id', auth()->id())->first();
         
-        // Ambil semua soal dari bank soal berdasarkan ID ujian
-        $soals = \App\Models\Soal::where('ujian_id', $ujian_id)->inRandomOrder()->get();
+        // --- PERBAIKAN: Gunakan relasi pivot Many-to-Many ---
+        $ujian = \App\Models\Ujian::findOrFail($ujian_id);
+        $soals = $ujian->soals()->inRandomOrder()->get(); 
+        // ----------------------------------------------------
         
-        // Ambil rekam jejak jawaban siswa (berguna jika siswa me-refresh halaman atau HP mati)
         $jawaban_tersimpan = \App\Models\JawabanSiswa::where('ujian_id', $ujian_id)
                                 ->where('siswa_id', $siswa->id)
-                                ->pluck('jawaban', 'soal_id'); 
-
+                                ->pluck('jawaban', 'soal_id');
         $data_soal = [];
         
         foreach ($soals as $soal) {
