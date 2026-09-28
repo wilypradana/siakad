@@ -103,4 +103,76 @@
         </form>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const inputs = document.querySelectorAll(
+        'input[name^="nilai["][type="number"]'
+    );
+
+    inputs.forEach(function (input) {
+
+        input.addEventListener('paste', function (e) {
+
+            const text = (e.clipboardData || window.clipboardData)
+                .getData('text');
+
+            // Jika hanya satu nilai biasa, biarkan browser menangani paste
+            if (!text.includes('\n') && !text.includes('\r')) {
+                return;
+            }
+
+            e.preventDefault();
+
+            // Ambil nilai per baris
+            const values = text
+                .split(/\r?\n/)
+                .map(value => value.trim())
+                .filter(value => value !== '');
+
+            // Tentukan kolom berdasarkan name input
+            const name = input.getAttribute('name');
+
+            // Contoh:
+            // nilai[12][s1]
+            // nilai[12][s2]
+            // nilai[12][s3]
+            // nilai[12][ujian]
+
+            const match = name.match(/\[([^\]]+)\]\[([^\]]+)\]/);
+
+            if (!match) {
+                return;
+            }
+
+            const kolom = match[2];
+
+            // Ambil semua input pada kolom yang sama
+            const columnInputs = Array.from(inputs).filter(function (el) {
+                const elName = el.getAttribute('name');
+                return elName.endsWith('][' + kolom + ']');
+            });
+
+            // Posisi siswa tempat paste dimulai
+            const startIndex = columnInputs.indexOf(input);
+
+            // Masukkan nilai ke bawah
+            values.forEach(function (value, index) {
+
+                const targetIndex = startIndex + index;
+
+                if (targetIndex < columnInputs.length) {
+                    columnInputs[targetIndex].value = value;
+                }
+
+            });
+
+        });
+
+    });
+
+});
+</script>
+
 @endsection
