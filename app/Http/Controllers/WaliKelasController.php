@@ -9,6 +9,7 @@ use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Models\JenisUjian;
 use App\Models\Nilai;
+use Maatwebsite\Excel\Facades\Excel;
 
 class WaliKelasController extends Controller
 {
@@ -106,6 +107,10 @@ class WaliKelasController extends Controller
     // ==========================================
     // FITUR BARU: Export Rekap Nilai 1 Kelas
     // ==========================================
+    // Jangan lupa panggil class ini di bagian paling atas file (dibawah use Illuminate\Http\Request;):
+    // use App\Exports\LeggerExport;
+    // use Maatwebsite\Excel\Facades\Excel;
+
     public function exportRekap(Request $request)
     {
         $request->validate([
@@ -116,70 +121,11 @@ class WaliKelasController extends Controller
         $kelas_wali = Kelas::where('guru_id', $guru->id)->first();
         $jenis_ujian = JenisUjian::findOrFail($request->jenis_ujian_id);
 
-        $data_siswa = Siswa::where('kelas_id', $kelas_wali->id)->orderBy('nama', 'asc')->get();
-        
-        // Ambil semua mapel sebagai kolom Excel (Header)
-        $data_mapel = \App\Models\Mapel::orderBy('nama_mapel', 'asc')->get();
+        // Buat nama file rapi tanpa spasi
+        $nama_file = 'Legger_Nilai_' . str_replace(' ', '_', $kelas_wali->nama_kelas) . '_' . date('dMy') . '.xlsx';
 
-        $nama_file = 'Rekap_Nilai_' . str_replace(' ', '_', $kelas_wali->nama_kelas) . '_' . str_replace(' ', '_', $jenis_ujian->nama_jenis) . '.csv';
-
-        $headers = array(
-            "Content-type"        => "text/csv",
-            "Content-Disposition" => "attachment; filename=$nama_file",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
-        );
-
-        $callback = function() use($data_siswa, $data_mapel, $jenis_ujian, $request) {
-            $file = fopen('php://output', 'w');
-            
-            // 1. Buat Baris Judul (Header Excel)
-            $header_row = ['NIS', 'Nama Siswa'];
-            foreach ($data_mapel as $mapel) {
-                $header_row[] = $mapel->nama_mapel;
-            }
-            $header_row[] = 'Rata-rata Kelas';
-            fputcsv($file, $header_row);
-
-            // 2. Looping data tiap siswa
-            foreach ($data_siswa as $siswa) {
-                $row = [
-                    $siswa->nis,
-                    $siswa->nama
-                ];
-
-                $total_nilai = 0;
-                $jumlah_mapel_diikuti = 0;
-
-                // Cek nilai siswa di setiap mapel
-                foreach ($data_mapel as $mapel) {
-                    $nilai = Nilai::where('siswa_id', $siswa->id)
-                                  ->where('mapel_id', $mapel->id)
-                                  ->where('jenis_ujian_id', $request->jenis_ujian_id)
-                                  ->first();
-
-                    if ($nilai) {
-                        $row[] = $nilai->nilai_akhir;
-                        $total_nilai += $nilai->nilai_akhir;
-                        $jumlah_mapel_diikuti++;
-                    } else {
-                        $row[] = '-'; // Kosong jika belum diinput guru mapel
-                    }
-                }
-
-                // Kalkulasi nilai rata-rata per siswa
-                $rata_rata = $jumlah_mapel_diikuti > 0 ? round($total_nilai / $jumlah_mapel_diikuti, 2) : 0;
-                $row[] = $rata_rata;
-
-                fputcsv($file, $row);
-            }
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        // Panggil library Maatwebsite Excel untuk men-download file .xlsx
+        return Excel::download(new \App\Exports\LeggerExport($kelas_wali->id, $request->jenis_ujian_id), $nama_file);
     }
-
     
 }

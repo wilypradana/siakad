@@ -39,6 +39,12 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 @endif
+@if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 mb-4" style="border-radius: 10px;">
+        <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+@endif
 
 {{-- GATEKEEPER ADMINISTRASI --}}
 @if($siswa)
@@ -50,7 +56,6 @@
                         <div>
                             <h5 class="fw-bold mb-1"><i class="fas fa-check-circle me-2"></i>Administrasi Lunas</h5>
                             <p class="mb-1 small">Kartu ujian sudah tersedia. Berikut adalah <b>Kode Unik Login Ujian</b> Anda:</p>
-                            <!-- Menampilkan Kode Unik secara langsung di Dashboard -->
                             <div class="badge bg-white text-danger border border-danger px-3 py-2 fs-6 fw-bold font-monospace shadow-sm">
                                 <i class="fas fa-key me-1"></i> {{ $siswa->nomor_kartu ?? 'Belum digenerate Admin' }}
                             </div>
@@ -90,11 +95,10 @@
                         $is_berjalan = now()->between($mulai, $selesai);
                         $lunas = $siswa && $siswa->status_bayar == 1;
 
-                        // CEK STATUS: Apakah siswa ini sudah pernah klik kerjakan?
-                        $sudah_mengerjakan = \App\Models\UjianSiswa::where('ujian_id', $ujian->id)
-                                                ->where('siswa_id', $siswa->id)
-                                                ->where('is_selesai', true)
-                                                ->exists();
+                        // CEK STATUS: Pastikan hanya pakai tabel HasilUjian untuk CBT & GForm
+                        $sudah_mengerjakan = \App\Models\HasilUjian::where('ujian_id', $ujian->id)
+                            ->where('siswa_id', $siswa->id)
+                            ->exists();
                     @endphp
 
                     <div class="card border-0 shadow-sm mb-3 {{ $is_berjalan ? 'bg-light border-start border-success border-4' : 'border-start border-secondary border-4' }}">
@@ -115,9 +119,16 @@
                                     <i class="fas fa-check-double me-1"></i> Selesai
                                 </button>
                             @elseif($is_berjalan && $lunas)
-                                <a href="{{ route('siswa.ujian.kerjakan', $ujian->id) }}" class="btn btn-primary btn-sm rounded-pill px-4 shadow-sm pulse-button">
-                                    Kerjakan <i class="fas fa-chevron-right ms-1"></i>
-                                </a>
+                                <!-- CEK APAKAH GURU SUDAH KLIK MULAI -->
+                                @if($ujian->is_active)
+                                    <a href="{{ route('siswa.ujian.kerjakan', $ujian->id) }}" class="btn btn-primary btn-sm rounded-pill px-4 shadow-sm pulse-button">
+                                        Kerjakan <i class="fas fa-chevron-right ms-1"></i>
+                                    </a>
+                                @else
+                                    <button class="btn btn-warning btn-sm rounded-pill px-4 shadow-sm text-dark fw-bold" disabled>
+                                        <i class="fas fa-hourglass-half me-1"></i> Menunggu Guru
+                                    </button>
+                                @endif
                             @else
                                 <button class="btn btn-secondary btn-sm rounded-pill px-4" disabled>
                                     <i class="fas fa-lock me-1"></i> Terkunci
@@ -146,7 +157,7 @@
                             <span class="badge bg-light text-dark">{{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }}</span>
                         </li>
                     @empty
-                        <li class="list-group-item px-4 py-4 text-center text-muted border-0 small italic">Sistem sedang di update</li>
+                        <li class="list-group-item px-4 py-4 text-center text-muted border-0 small italic">Belum ada jadwal KBM.</li>
                     @endforelse
                 </ul>
             </div>
@@ -176,15 +187,19 @@
                         <tbody>
                             @forelse($mapel_kelas as $index => $mapel)
                                 @php
-                                    // Cari apakah ada jadwal ujian untuk mapel ini di kelas siswa
-                                    $ujianMapel = $semua_ujian_kelas->where('mapel_id', $mapel->id)->first();
+                                    // Kueri langsung ke Database untuk menghindari error Undefined Variable
+                                    $ujianMapel = \App\Models\Ujian::where('mapel_id', $mapel->id)
+                                                    ->where('kelas_id', $siswa->kelas_id)
+                                                    ->first();
                                     
                                     $status_keterangan = 'Belum Ada Jadwal Ujian';
                                     $badge_class = 'bg-secondary text-white';
 
                                     if ($ujianMapel) {
-                                        // Cek apakah sudah dikerjakan/selesai
-                                        $sudah_dikerjakan = in_array($ujianMapel->id, $ujian_selesai_ids);
+                                        // Pengecekan aman di tabel HasilUjian
+                                        $sudah_dikerjakan = \App\Models\HasilUjian::where('ujian_id', $ujianMapel->id)
+                                                                ->where('siswa_id', $siswa->id)
+                                                                ->exists();
                                         
                                         if ($sudah_dikerjakan) {
                                             $status_keterangan = 'Sudah Ujian (Selesai)';
@@ -206,13 +221,13 @@
                                             }
                                         }
                                     }
-                                @endphp {{-- PASTIKAN MENGGUNAKAN @endphp DI SINI --}}
+                                @endphp
                                 
                                 <tr>
                                     <td class="text-center">{{ $index + 1 }}</td>
                                     <td class="fw-bold">{{ strtoupper($mapel->nama_mapel) }}</td>
                                     <td class="text-center">
-                                        <span class="badge {{ $badge_class }} px-3 py-2" style="font-size: 0.85rem;">
+                                        <span class="badge {{ $badge_class }} px-3 py-2 shadow-sm" style="font-size: 0.85rem;">
                                             {{ $status_keterangan }}
                                         </span>
                                     </td>

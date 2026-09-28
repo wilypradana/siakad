@@ -111,14 +111,25 @@
     <!-- FORM HAPUS MASSAL -->
     <form action="{{ route('ujian.bulkDelete') }}" method="POST">
         @csrf
-        @method('DELETE')
         
         <div class="card-header bg-white pt-3 pb-2 border-0 d-flex justify-content-between align-items-center">
             <h5 class="fw-bold text-secondary mb-0"><i class="fas fa-list me-2"></i> Daftar Jadwal Ujian Aktif</h5>
-            <button type="submit" class="btn btn-danger btn-sm shadow-sm fw-bold" onclick="return confirm('Yakin ingin menghapus semua jadwal ujian yang diceklis?')">
-                <i class="fas fa-trash-alt me-1"></i> Hapus Terpilih
-            </button>
+            <div>
+            <!-- Tombol Buka Massal -->
+                <button type="submit" formaction="{{ route('ujian.bulkToggle', ['status' => 1]) }}" class="btn btn-success btn-sm shadow-sm fw-bold me-1">
+                    <i class="fas fa-lock-open me-1"></i> Buka Terpilih
+                </button>
+                <!-- Tombol Tutup Massal -->
+                <button type="submit" formaction="{{ route('ujian.bulkToggle', ['status' => 0]) }}" class="btn btn-warning btn-sm shadow-sm fw-bold text-dark me-1">
+                    <i class="fas fa-lock me-1"></i> Tutup Terpilih
+                </button>
+
+                <button type="submit" class="btn btn-danger btn-sm shadow-sm fw-bold" onclick="return confirm('Yakin ingin menghapus semua jadwal ujian yang diceklis?')">
+                    <i class="fas fa-trash-alt me-1"></i> Hapus Terpilih
+                </button>
+            </div>
         </div>
+
         
         <div class="card-body">
             <div class="table-responsive">
@@ -172,6 +183,22 @@
                             </td>
                             <td class="text-center">
                                 <div class="btn-group">
+                                    @if($ujian->is_active)
+                                        <a href="{{ route('ujian.toggle_status', $ujian->id) }}" class="btn btn-sm btn-danger text-white rounded-start" style="border-top-right-radius: 0; border-bottom-right-radius: 0; margin-right: -2px;" title="Kunci Akses">
+                                            <i class="fas fa-lock"></i>
+                                        </a>
+                                    @else
+                                        <a href="{{ route('ujian.toggle_status', $ujian->id) }}" class="btn btn-sm btn-success text-white rounded-start pulse-button" style="border-top-right-radius: 0; border-bottom-right-radius: 0; margin-right: -2px;" title="Mulai Ujian">
+                                            <i class="fas fa-lock-open"></i> Mulai
+                                        </a>
+                                    @endif
+                                    <a href="{{ route('admin.soal.index', $ujian->id) }}" class="btn btn-sm btn-success text-white" title="Kelola Soal CBT">
+                                        <i class="fas fa-list-ol"></i> Soal
+                                    </a>
+                                    <!-- TOMBOL BARU: REKAP NILAI -->
+                                    <a href="{{ route('admin.ujian.hasil', $ujian->id) }}" class="btn btn-sm btn-primary text-white" title="Rekap Nilai Siswa">
+                                        <i class="fas fa-chart-bar"></i> Nilai  
+                                    </a>
                                     <a href="{{ $ujian->link_gform }}" target="_blank" class="btn btn-sm btn-outline-primary" title="Cek Link">
                                         <i class="fas fa-external-link-alt"></i>
                                     </a>
@@ -276,8 +303,20 @@
                         @endif
 
                         <div class="col-md-12 mb-3">
+                            <label>Metode Ujian <span class="text-danger">*</span></label>
+                            <select name="metode_ujian" class="form-select select-metode-edit" data-id="{{ $ujian->id }}" required>
+                                <option value="gform" {{ $ujian->metode_ujian == 'gform' ? 'selected' : '' }}>Google Form</option>
+                                <option value="cbt" {{ $ujian->metode_ujian == 'cbt' ? 'selected' : '' }}>CBT Lokal (Bank Soal)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-12 mb-3 kotak-link-edit-{{ $ujian->id }}" style="{{ $ujian->metode_ujian == 'cbt' ? 'display: none;' : '' }}">
                             <label>Link Google Form <span class="text-danger">*</span></label>
-                            <input type="url" name="link_gform" class="form-control" value="{{ $ujian->link_gform }}" required>
+                            <input type="url" name="link_gform" id="input_link_gform_edit_{{ $ujian->id }}" class="form-control" value="{{ $ujian->link_gform }}">
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label>Durasi Ujian (Menit) <span class="text-danger">*</span></label>
+                            <input type="number" name="durasi" class="form-control" value="{{ $ujian->durasi }}" required>
                         </div>
                         
                         <div class="col-md-6 mb-3">
@@ -338,7 +377,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Buat Jadwal Ujian G-Form</h5>
+                <h5 class="modal-title">Buat Jadwal Ujian </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form action="{{ route('ujian.store') }}" method="POST">
@@ -394,8 +433,21 @@
                     @endif
 
                     <div class="col-md-12 mb-3">
+                        <label>Metode Ujian <span class="text-danger">*</span></label>
+                        <select name="metode_ujian" id="pilih_metode_tambah" class="form-select fw-bold text-primary" required>
+                            <option value="gform">Google Form</option>
+                            <option value="cbt">CBT Lokal (Bank Soal)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <label>Durasi Ujian (Menit) <span class="text-danger">*</span></label>
+                        <input type="number" name="durasi" class="form-control" placeholder="Contoh: 60" value="{{ $ujian->durasi ?? '' }}" required>
+                    </div>
+
+                    <!-- Input Link G-Form (Dibungkus agar bisa disembunyikan) -->
+                    <div class="col-md-12 mb-3" id="kotak_link_gform_tambah">
                         <label>Link Google Form <span class="text-danger">*</span></label>
-                        <input type="url" name="link_gform" class="form-control" placeholder="https://docs.google.com/forms/..." required>
+                        <input type="url" name="link_gform" id="input_link_gform_tambah" class="form-control" placeholder="https://docs.google.com/forms/...">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label>Waktu Mulai</label>
@@ -484,6 +536,30 @@ $(document).ready(function() {
             container.html('<div class="text-center text-muted small py-2">Silakan pilih Mata Pelajaran terlebih dahulu.</div>');
         }
     });
+});
+
+
+// Script untuk Modal Tambah Ujian
+$('#pilih_metode_tambah').on('change', function() {
+    if ($(this).val() == 'gform') {
+        $('#kotak_link_gform_tambah').slideDown();
+        $('#input_link_gform_tambah').prop('required', true);
+    } else {
+        $('#kotak_link_gform_tambah').slideUp();
+        $('#input_link_gform_tambah').prop('required', false).val(''); // Hapus isian jika pindah ke CBT
+    }
+});
+
+// Script untuk Modal Edit Ujian (Dinamis)
+$('.select-metode-edit').on('change', function() {
+    var id = $(this).data('id');
+    if ($(this).val() == 'gform') {
+        $('.kotak-link-edit-' + id).slideDown();
+        $('#input_link_gform_edit_' + id).prop('required', true);
+    } else {
+        $('.kotak-link-edit-' + id).slideUp();
+        $('#input_link_gform_edit_' + id).prop('required', false);
+    }
 });
 </script>
 @endsection

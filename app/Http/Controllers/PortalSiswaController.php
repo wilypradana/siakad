@@ -74,34 +74,73 @@ class PortalSiswaController extends Controller
     public function kerjakanUjian($id)
     {
         $siswa = \App\Models\Siswa::where('user_id', auth()->user()->id)->first();
-
-        if (!$siswa) {
-            return redirect()->route('siswa.dashboard')->with('error', 'Profil tidak ditemukan.');
-        }
-
-        // CATAT OTOMATIS: Begitu siswa masuk ke halaman ini, tandai sebagai sudah dikerjakan
-        //\App\Models\UjianSiswa::updateOrCreate(
-        //    ['ujian_id' => $id, 'siswa_id' => $siswa->id],
-        //    ['is_selesai' => true] // Langsung kunci statusnya
-      //);
+        if (!$siswa) return redirect()->route('siswa.dashboard')->with('error', 'Profil tidak ditemukan.');
 
         $ujian = \App\Models\Ujian::findOrFail($id);
+        
+        // PEMBLOKIR: Cek apakah guru sudah menekan tombol Mulai
+        if (!$ujian->is_active) {
+            return redirect()->route('siswa.dashboard')->with('error', 'Ujian belum dimulai! Silakan tunggu instruksi dari guru pengawas.');
+        }
+
         return view('siswa.kerjakan_ujian', compact('ujian', 'siswa'));
     }
+    public function selesaiUjian(Request $request, $id)
+    {
+        $ujian = \App\Models\Ujian::findOrFail($id);
+        $siswa = \App\Models\Siswa::where('user_id', auth()->id())->first();
 
-    // FUNGSI BARU: Tandai Selesai
-    public function selesaiUjian($id) {
-        $siswa = Siswa::where('user_id', Auth::id())->first();
-        
-        // Simpan ke database bahwa siswa ini SUDAH SELESAI
-        UjianSiswa::updateOrCreate(
-            ['ujian_id' => $id, 'siswa_id' => $siswa->id],
-            ['is_selesai' => true]
-        );
+        // 1. JIKA UJIAN MENGGUNAKAN METODE CBT LOKAL
+        if ($ujian->metode_ujian == 'cbt') {
+            $total_soal = \App\Models\Soal::where('ujian_id', $id)->count();
+            
+            if ($total_soal > 0) {
+                $jumlah_benar = \App\Models\JawabanSiswa::where('ujian_id', $id)
+                                    ->where('siswa_id', $siswa->id)
+                                    ->where('is_benar', 1)
+                                    ->count();
+                                    
+                $jumlah_dijawab = \App\Models\JawabanSiswa::where('ujian_id', $id)
+                                    ->where('siswa_id', $siswa->id)
+                                    ->count();
 
-        return redirect()->route('siswa.dashboard')->with('success', 'Ujian telah diselesaikan. Terima kasih!');
+                $jumlah_salah = $jumlah_dijawab - $jumlah_benar;
+                $nilai_akhir = ($jumlah_benar / $total_soal) * 100;
+
+                \App\Models\HasilUjian::updateOrCreate(
+                    ['ujian_id' => $id, 'siswa_id' => $siswa->id],
+                    [
+                        'jumlah_benar'  => $jumlah_benar,
+                        'jumlah_salah'  => $jumlah_salah,
+                        'nilai_akhir'   => round($nilai_akhir)
+                    ]
+                );
+            }
+        } 
+        // 2. JIKA UJIAN MENGGUNAKAN G-FORM
+        else {
+            // Masukkan data penyelesaian dummy agar status di dashboard berubah menjadi "Selesai".
+            // Nilai 0 ini nantinya bisa diperbarui secara manual oleh guru melalui rekap nilai.
+            \App\Models\HasilUjian::updateOrCreate(
+                ['ujian_id' => $id, 'siswa_id' => $siswa->id],
+                [
+                    'jumlah_benar'  => 0,
+                    'jumlah_salah'  => 0,
+                    'nilai_akhir'   => 0
+                ]
+            );
+        }
+
+        // Hapus sesi token agar siswa tidak bisa masuk lagi
+        session()->forget('ujian_verified_' . $id);
+
+        // Jika siswa disubmit paksa karena terdeteksi curang
+        if ($request->has('pelanggaran') && $request->pelanggaran == '1') {
+            return redirect()->route('siswa.dashboard')->with('error', 'UJIAN DIHENTIKAN PAKSA! Anda terdeteksi melakukan pelanggaran berulang kali.');
+        }
+
+        return redirect()->route('siswa.dashboard')->with('success', 'Ujian berhasil diselesaikan!');
     }
-
 
    public function cetakKartu()
 {
@@ -146,4 +185,75 @@ class PortalSiswaController extends Controller
 
     return back()->with('error', 'Kode Unik Kartu Salah!');
 }
+
+// ========================================================
+    // 1. MENGIRIM DATA SOAL KE BROWSER SISWA (TANPA KUNCI JAWABAN)
+    // ========================================================
+    public function getSoalCBT($ujian_id)
+    {
+        // Pastikan keamanan: Cek apakah siswa sudah verifikasi token ujian ini
+        if (!session()->has('ujian_verified_' . $ujian_id)) {
+            return response()->json(['error' => 'Akses ditolak.'], 403);
+        }
+
+        $siswa = \App\Models\Siswa::where('user_id', auth()->id())->first();
+        
+        // Ambil semua soal dari bank soal berdasarkan ID ujian
+        $soals = \App\Models\Soal::where('ujian_id', $ujian_id)->inRandomOrder()->get();
+        
+        // Ambil rekam jejak jawaban siswa (berguna jika siswa me-refresh halaman atau HP mati)
+        $jawaban_tersimpan = \App\Models\JawabanSiswa::where('ujian_id', $ujian_id)
+                                ->where('siswa_id', $siswa->id)
+                                ->pluck('jawaban', 'soal_id'); 
+
+        $data_soal = [];
+        
+        foreach ($soals as $soal) {
+            $data_soal[] = [
+                'id'         => $soal->id,
+                'pertanyaan' => $soal->pertanyaan,
+                'gambar'     => $soal->gambar,
+                'opsi_a'     => $soal->opsi_a,
+                'opsi_b'     => $soal->opsi_b,
+                'opsi_c'     => $soal->opsi_c,
+                'opsi_d'     => $soal->opsi_d,
+                'opsi_e'     => $soal->opsi_e,
+                // PENTING: Kunci jawaban TIDAK DIKIRIM agar tidak bisa diretas lewat Inspect Element
+                'jawaban_siswa' => $jawaban_tersimpan[$soal->id] ?? null 
+            ];
+        }
+
+        return response()->json($data_soal);
+    }
+
+    // ========================================================
+    // 2. MENANGKAP DAN MENYIMPAN KLIK JAWABAN SISWA
+    // ========================================================
+    public function simpanJawabanCBT(Request $request, $ujian_id)
+    {
+        if (!session()->has('ujian_verified_' . $ujian_id)) {
+            return response()->json(['error' => 'Akses ditolak.'], 403);
+        }
+
+        $siswa = \App\Models\Siswa::where('user_id', auth()->id())->first();
+        $soal = \App\Models\Soal::findOrFail($request->soal_id);
+
+        // Langsung periksa apakah jawaban benar atau salah di sisi server
+        $is_benar = ($soal->kunci_jawaban == $request->jawaban) ? 1 : 0;
+
+        // updateOrCreate: Jika siswa mengubah jawaban, data lama akan ditimpa (bukan ditambah)
+        \App\Models\JawabanSiswa::updateOrCreate(
+            [
+                'ujian_id' => $ujian_id,
+                'siswa_id' => $siswa->id,
+                'soal_id'  => $request->soal_id
+            ],
+            [
+                'jawaban'  => $request->jawaban,
+                'is_benar' => $is_benar
+            ]
+        );
+
+        return response()->json(['status' => 'Berhasil disimpan']);
+    }
 }

@@ -14,7 +14,7 @@
         @csrf
         <input type="hidden" name="jenis_ujian_id" value="{{ $jenis_ujian->id }}">
         <button type="submit" class="btn btn-success shadow-sm fw-bold">
-            <i class="fas fa-download me-1"></i> Download Legger (CSV)
+            <i class="fas fa-file-excel me-1"></i> Download Legger (Excel)
         </button>
     </form>
 </div>

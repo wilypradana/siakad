@@ -95,4 +95,4 @@ class PortalGuruController extends Controller
 
         return back()->with('success', 'Nilai ' . $jenis_ujian->nama_jenis . ' berhasil disimpan!');
     }
-}
+}   
