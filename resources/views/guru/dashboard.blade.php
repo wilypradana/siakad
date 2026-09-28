@@ -595,541 +595,393 @@
     </div>
 
 </div>
-{{-- ========================================================
-    MODAL FITUR BARU
-========================================================= --}}
+{{-- ============================================================
+    MODAL UPDATE FITUR BARU
+============================================================ --}}
 <div
     id="featureModal"
-    class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-3"
-    style="
-        z-index:99999;
-        background:rgba(15,23,42,.70);
-        backdrop-filter:blur(7px);
-        opacity:0;
-        visibility:hidden;
-        transition:all .25s ease;
-    "
+    class="modal fade"
+    tabindex="-1"
+    aria-labelledby="featureModalLabel"
+    aria-hidden="true"
 >
+    <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+        <div class="modal-content border-0 overflow-hidden shadow-lg"
+             style="border-radius: 24px;">
 
-    <div
-        id="featureModalBox"
-        class="bg-white rounded-4 shadow-lg overflow-hidden w-100"
-        style="
-            max-width:900px;
-            max-height:90vh;
-            transform:translateY(25px) scale(.97);
-            transition:all .3s ease;
-        "
-    >
-
-        {{-- ==================================================
-            HEADER
-        ================================================== --}}
-        <div
-            class="position-relative overflow-hidden text-white p-4 p-md-5"
-            style="
-                background:
-                    radial-gradient(circle at 90% 10%,rgba(255,255,255,.18),transparent 22%),
-                    radial-gradient(circle at 10% 100%,rgba(99,102,241,.25),transparent 30%),
-                    linear-gradient(135deg,#1e3a8a,#4338ca 50%,#7e22ce);
-            "
-        >
-
-            {{-- Dekorasi --}}
+            {{-- HEADER --}}
             <div
-                class="position-absolute rounded-circle"
+                class="position-relative text-white p-4 p-md-5 overflow-hidden"
                 style="
-                    width:180px;
-                    height:180px;
-                    right:-70px;
-                    top:-90px;
-                    background:rgba(255,255,255,.07);
+                    background:
+                        radial-gradient(circle at 90% 10%, rgba(255,255,255,.15), transparent 25%),
+                        radial-gradient(circle at 10% 100%, rgba(129,140,248,.25), transparent 30%),
+                        linear-gradient(135deg,#111827,#312e81 55%,#6d28d9);
                 "
-            ></div>
-
-            <div
-                class="position-absolute rounded-circle"
-                style="
-                    width:120px;
-                    height:120px;
-                    left:35%;
-                    bottom:-80px;
-                    background:rgba(255,255,255,.05);
-                "
-            ></div>
-
-
-            {{-- CLOSE --}}
-            <button
-                type="button"
-                onclick="closeFeatureModal()"
-                aria-label="Tutup"
-                class="position-absolute top-0 end-0 m-3 d-flex align-items-center justify-content-center border-0 rounded-circle text-white"
-                style="
-                    width:42px;
-                    height:42px;
-                    background:rgba(255,255,255,.13);
-                    font-size:25px;
-                    transition:.2s;
-                "
-                onmouseover="this.style.background='rgba(255,255,255,.25)'"
-                onmouseout="this.style.background='rgba(255,255,255,.13)'"
             >
-                &times;
-            </button>
 
-
-            <div class="position-relative pe-5">
-
-                {{-- LABEL --}}
+                {{-- Ornamen --}}
                 <div
-                    class="d-inline-flex align-items-center gap-2 rounded-pill px-3 py-2 mb-3"
-                    style="background:rgba(255,255,255,.12);"
-                >
-                    <span
-                        class="rounded-circle bg-success"
-                        style="
-                            width:8px;
-                            height:8px;
-                            box-shadow:0 0 0 4px rgba(16,185,129,.15);
-                        "
-                    ></span>
+                    class="position-absolute rounded-circle"
+                    style="
+                        width:180px;
+                        height:180px;
+                        right:-70px;
+                        top:-90px;
+                        background:rgba(255,255,255,.06);
+                    "
+                ></div>
 
-                    <span
-                        class="fw-bold"
-                        style="font-size:.7rem;letter-spacing:.08em;"
+                <div
+                    class="position-absolute rounded-circle"
+                    style="
+                        width:120px;
+                        height:120px;
+                        left:35%;
+                        bottom:-80px;
+                        background:rgba(255,255,255,.05);
+                    "
+                ></div>
+
+                {{-- CLOSE --}}
+                <button
+                    type="button"
+                    class="btn-close btn-close-white position-absolute top-0 end-0 m-3"
+                    data-bs-dismiss="modal"
+                    aria-label="Tutup"
+                ></button>
+
+                <div class="position-relative pe-5">
+
+                    <div
+                        class="d-inline-flex align-items-center gap-2 rounded-pill px-3 py-2 mb-3"
+                        style="background:rgba(255,255,255,.12);"
                     >
-                        FITUR BARU
-                    </span>
+                        <span
+                            class="d-inline-block rounded-circle bg-success"
+                            style="width:8px;height:8px;"
+                        ></span>
+
+                        <span class="small fw-bold">
+                            FITUR BARU
+                        </span>
+                    </div>
+
+                    <h2
+                        id="featureModalLabel"
+                        class="fw-bold mb-2"
+                        style="font-size:clamp(1.5rem,3vw,2.3rem);"
+                    >
+                        Pengelolaan Ujian Kini Lebih Cerdas 🚀
+                    </h2>
+
+                    <p class="text-white-50 mb-0" style="max-width:720px;">
+                        Berbagai fitur baru telah hadir untuk membuat
+                        pengelolaan soal, ujian, timer, nilai, dan rekap
+                        menjadi lebih cepat dan praktis.
+                    </p>
+
                 </div>
-
-
-                <h2 class="fw-bold mb-2"
-                    style="font-size:clamp(1.5rem,4vw,2.3rem);">
-                    Ujian Lebih Mudah & Terpusat 🚀
-                </h2>
-
-                <p
-                    class="text-white-50 mb-0"
-                    style="max-width:650px;line-height:1.7;"
-                >
-                    Nikmati berbagai pembaruan untuk membantu Bapak/Ibu
-                    mengelola soal, ujian, timer, nilai, dan rekap
-                    dengan lebih cepat dan praktis.
-                </p>
-
             </div>
 
-        </div>
 
-
-        {{-- ==================================================
-            CONTENT
-        ================================================== --}}
-        <div
-            style="
-                max-height:48vh;
-                overflow-y:auto;
-            "
-        >
-
-            <div class="p-3 p-md-4">
+            {{-- ISI --}}
+            <div class="modal-body bg-light p-3 p-md-4">
 
                 <div class="row g-3">
 
-
                     {{-- BANK SOAL --}}
-                    <div class="col-md-6">
-
-                        <div
-                            class="h-100 rounded-4 p-4 border"
-                            style="
-                                background:#eef2ff;
-                                border-color:#c7d2fe !important;
-                            "
-                        >
-
+                    <div class="col-md-6 col-lg-4">
+                        <div class="h-100 bg-white border rounded-4 p-4 shadow-sm">
                             <div
-                                class="d-flex align-items-center justify-content-center rounded-3 mb-3"
+                                class="d-flex align-items-center justify-content-center rounded-4 mb-3"
                                 style="
-                                    width:46px;
-                                    height:46px;
-                                    background:#4f46e5;
-                                    color:white;
+                                    width:52px;
+                                    height:52px;
+                                    background:#eef2ff;
+                                    color:#4f46e5;
                                 "
                             >
-                                <i class="fas fa-database"></i>
+                                <i class="fas fa-database fs-5"></i>
                             </div>
 
-                            <h6 class="fw-bold text-dark mb-2">
+                            <h6 class="fw-bold mb-2">
                                 Bank Soal Terpusat
                             </h6>
 
-                            <p class="small text-muted mb-0"
-                               style="line-height:1.65;">
-                                Buat atau unggah soal sekali, kemudian
-                                gunakan fitur <strong>Salin Soal</strong>
-                                untuk kelas lain tanpa membuat database
-                                menjadi penuh.
+                            <p class="text-muted small mb-0 lh-lg">
+                                Buat atau unggah soal sekali, lalu
+                                <strong>Salin Soal</strong> ke kelas lain
+                                tanpa membuat database membengkak.
                             </p>
-
                         </div>
-
                     </div>
 
 
                     {{-- EXCEL --}}
-                    <div class="col-md-6">
-
-                        <div
-                            class="h-100 rounded-4 p-4 border"
-                            style="
-                                background:#ecfdf5;
-                                border-color:#a7f3d0 !important;
-                            "
-                        >
-
+                    <div class="col-md-6 col-lg-4">
+                        <div class="h-100 bg-white border rounded-4 p-4 shadow-sm">
                             <div
-                                class="d-flex align-items-center justify-content-center rounded-3 mb-3"
+                                class="d-flex align-items-center justify-content-center rounded-4 mb-3"
                                 style="
-                                    width:46px;
-                                    height:46px;
-                                    background:#059669;
-                                    color:white;
+                                    width:52px;
+                                    height:52px;
+                                    background:#ecfdf5;
+                                    color:#059669;
                                 "
                             >
-                                <i class="fas fa-file-excel"></i>
+                                <i class="fas fa-file-excel fs-5"></i>
                             </div>
 
-                            <h6 class="fw-bold text-dark mb-2">
+                            <h6 class="fw-bold mb-2">
                                 Import Soal via Excel
                             </h6>
 
-                            <p class="small text-muted mb-0"
-                               style="line-height:1.65;">
-                                Unduh template, isi soal dan kunci jawaban,
-                                lalu upload. Mendukung kode
-                                <strong>MathJax / LaTeX</strong>.
+                            <p class="text-muted small mb-0 lh-lg">
+                                Import soal melalui template Excel.
+                                Mendukung <strong>MathJax/LaTeX</strong>
+                                untuk rumus matematika.
                             </p>
-
                         </div>
-
                     </div>
 
 
                     {{-- TIMER --}}
-                    <div class="col-md-6">
-
-                        <div
-                            class="h-100 rounded-4 p-4 border"
-                            style="
-                                background:#fffbeb;
-                                border-color:#fde68a !important;
-                            "
-                        >
-
+                    <div class="col-md-6 col-lg-4">
+                        <div class="h-100 bg-white border rounded-4 p-4 shadow-sm">
                             <div
-                                class="d-flex align-items-center justify-content-center rounded-3 mb-3"
+                                class="d-flex align-items-center justify-content-center rounded-4 mb-3"
                                 style="
-                                    width:46px;
-                                    height:46px;
-                                    background:#f59e0b;
-                                    color:white;
+                                    width:52px;
+                                    height:52px;
+                                    background:#fffbeb;
+                                    color:#d97706;
                                 "
                             >
-                                <i class="fas fa-stopwatch"></i>
+                                <i class="fas fa-stopwatch fs-5"></i>
                             </div>
 
-                            <h6 class="fw-bold text-dark mb-2">
+                            <h6 class="fw-bold mb-2">
                                 Smart Timer
                             </h6>
 
-                            <p class="small text-muted mb-0"
-                               style="line-height:1.65;">
-                                Durasi ujian tetap berjalan meskipun siswa
-                                melakukan refresh, menutup browser,
-                                atau berpindah tab.
+                            <p class="text-muted small mb-0 lh-lg">
+                                Timer tetap berjalan meskipun siswa
+                                refresh, menutup browser, atau berpindah tab.
                             </p>
-
                         </div>
-
                     </div>
 
 
                     {{-- TUTUP PAKSA --}}
-                    <div class="col-md-6">
-
-                        <div
-                            class="h-100 rounded-4 p-4 border"
-                            style="
-                                background:#fff7ed;
-                                border-color:#fed7aa !important;
-                            "
-                        >
-
+                    <div class="col-md-6 col-lg-4">
+                        <div class="h-100 bg-white border rounded-4 p-4 shadow-sm">
                             <div
-                                class="d-flex align-items-center justify-content-center rounded-3 mb-3"
+                                class="d-flex align-items-center justify-content-center rounded-4 mb-3"
                                 style="
-                                    width:46px;
-                                    height:46px;
-                                    background:#f97316;
-                                    color:white;
+                                    width:52px;
+                                    height:52px;
+                                    background:#fff7ed;
+                                    color:#ea580c;
                                 "
                             >
-                                <i class="fas fa-lock"></i>
+                                <i class="fas fa-lock fs-5"></i>
                             </div>
 
-                            <h6 class="fw-bold text-dark mb-2">
+                            <h6 class="fw-bold mb-2">
                                 Tutup Paksa
                             </h6>
 
-                            <p class="small text-muted mb-0"
-                               style="line-height:1.65;">
-                                Tutup ujian siswa yang masih menggantung,
-                                nilai jawaban terakhir secara otomatis,
-                                dan kunci portal kelas.
+                            <p class="text-muted small mb-0 lh-lg">
+                                Tutup ujian siswa yang menggantung,
+                                nilai otomatis diproses dan portal kelas
+                                dapat dikunci.
                             </p>
-
                         </div>
-
                     </div>
 
 
                     {{-- RESET --}}
-                    <div class="col-md-6">
-
-                        <div
-                            class="h-100 rounded-4 p-4 border"
-                            style="
-                                background:#fef2f2;
-                                border-color:#fecaca !important;
-                            "
-                        >
-
+                    <div class="col-md-6 col-lg-4">
+                        <div class="h-100 bg-white border rounded-4 p-4 shadow-sm">
                             <div
-                                class="d-flex align-items-center justify-content-center rounded-3 mb-3"
+                                class="d-flex align-items-center justify-content-center rounded-4 mb-3"
                                 style="
-                                    width:46px;
-                                    height:46px;
-                                    background:#dc2626;
-                                    color:white;
+                                    width:52px;
+                                    height:52px;
+                                    background:#fef2f2;
+                                    color:#dc2626;
                                 "
                             >
-                                <i class="fas fa-rotate-left"></i>
+                                <i class="fas fa-rotate-left fs-5"></i>
                             </div>
 
-                            <h6 class="fw-bold text-dark mb-2">
+                            <h6 class="fw-bold mb-2">
                                 Reset Semua
                             </h6>
 
-                            <p class="small text-muted mb-0"
-                               style="line-height:1.65;">
-                                Reset nilai dan riwayat jawaban satu kelas
-                                ketika terjadi kendala massal.
+                            <p class="text-muted small mb-0 lh-lg">
+                                Reset nilai dan riwayat jawaban
+                                satu kelas ketika terjadi kendala massal.
                             </p>
-
                         </div>
-
                     </div>
 
 
                     {{-- LEGGER --}}
-                    <div class="col-md-6">
-
-                        <div
-                            class="h-100 rounded-4 p-4 border"
-                            style="
-                                background:#f0f9ff;
-                                border-color:#bae6fd !important;
-                            "
-                        >
-
+                    <div class="col-md-6 col-lg-4">
+                        <div class="h-100 bg-white border rounded-4 p-4 shadow-sm">
                             <div
-                                class="d-flex align-items-center justify-content-center rounded-3 mb-3"
+                                class="d-flex align-items-center justify-content-center rounded-4 mb-3"
                                 style="
-                                    width:46px;
-                                    height:46px;
-                                    background:#0284c7;
-                                    color:white;
+                                    width:52px;
+                                    height:52px;
+                                    background:#eff6ff;
+                                    color:#2563eb;
                                 "
                             >
-                                <i class="fas fa-download"></i>
+                                <i class="fas fa-file-download fs-5"></i>
                             </div>
 
-                            <h6 class="fw-bold text-dark mb-2">
-                                Download Legger Excel
+                            <h6 class="fw-bold mb-2">
+                                Legger Excel .xlsx
                             </h6>
 
-                            <p class="small text-muted mb-0"
-                               style="line-height:1.65;">
-                                Download nilai dalam format
-                                <strong>.xlsx</strong> dengan header,
-                                data siswa, dan rata-rata yang rapi.
+                            <p class="text-muted small mb-0 lh-lg">
+                                Download legger dalam Excel asli dengan
+                                header rapi dan kolom rata-rata siswa.
                             </p>
-
                         </div>
-
                     </div>
 
 
                     {{-- PRINT A4 --}}
                     <div class="col-12">
-
                         <div
-                            class="rounded-4 p-4 border d-flex align-items-center"
-                            style="
-                                background:#faf5ff;
-                                border-color:#e9d5ff !important;
-                            "
+                            class="bg-white border rounded-4 p-4 shadow-sm d-flex align-items-center"
                         >
-
                             <div
-                                class="d-flex align-items-center justify-content-center rounded-3 flex-shrink-0 me-3"
+                                class="d-flex align-items-center justify-content-center rounded-4 flex-shrink-0 me-3"
                                 style="
-                                    width:52px;
-                                    height:52px;
-                                    background:#9333ea;
-                                    color:white;
+                                    width:58px;
+                                    height:58px;
+                                    background:#f5f3ff;
+                                    color:#7c3aed;
                                 "
                             >
-                                <i class="fas fa-print"></i>
+                                <i class="fas fa-print fs-5"></i>
                             </div>
 
                             <div>
-
-                                <h6 class="fw-bold text-dark mb-1">
+                                <h6 class="fw-bold mb-1">
                                     Cetak Rekap 1 Lembar A4
                                 </h6>
 
-                                <p class="small text-muted mb-0"
-                                   style="line-height:1.6;">
-                                    Rekap nilai telah dioptimalkan untuk
-                                    dicetak dalam satu lembar A4,
-                                    lengkap dengan kop identitas ujian.
+                                <p class="text-muted small mb-0">
+                                    Rekap nilai sudah dioptimalkan agar
+                                    sekitar 35–40 nama siswa dapat tercetak
+                                    dalam satu lembar A4.
                                 </p>
-
                             </div>
-
                         </div>
-
                     </div>
 
                 </div>
+            </div>
+
+
+            {{-- FOOTER --}}
+            <div class="modal-footer bg-white border-top px-4 py-3">
+
+                <div class="form-check me-auto">
+                    <input
+                        class="form-check-input"
+                        type="checkbox"
+                        id="dontShowToday"
+                    >
+
+                    <label
+                        class="form-check-label small text-muted"
+                        for="dontShowToday"
+                    >
+                        Jangan tampilkan lagi hari ini
+                    </label>
+                </div>
+
+                <button
+                    type="button"
+                    class="btn btn-primary rounded-pill px-4 fw-semibold"
+                    data-bs-dismiss="modal"
+                >
+                    <i class="fas fa-check me-1"></i>
+                    Mengerti
+                </button>
 
             </div>
 
         </div>
-
-
-        {{-- ==================================================
-            FOOTER
-        ================================================== --}}
-        <div
-            class="d-flex flex-column flex-sm-row align-items-center justify-content-between gap-3 px-4 py-3 border-top"
-            style="background:#f8fafc;"
-        >
-
-            <div class="text-center text-sm-start">
-
-                <div class="fw-bold text-dark small">
-                    Sistem ujian semakin lengkap.
-                </div>
-
-                <div class="text-muted"
-                     style="font-size:.75rem;">
-                    Semua fitur baru siap digunakan.
-                </div>
-
-            </div>
-
-
-            <button
-                type="button"
-                onclick="closeFeatureModal()"
-                class="btn btn-dark rounded-pill px-4 py-2 fw-bold shadow-sm"
-            >
-                <i class="fas fa-check me-2"></i>
-                Mengerti, Tutup
-            </button>
-
-        </div>
-
     </div>
-
 </div>
 
 
-{{-- ========================================================
+{{-- ============================================================
     JAVASCRIPT MODAL
-========================================================= --}}
+============================================================ --}}
 <script>
+document.addEventListener('DOMContentLoaded', function () {
 
-    function openFeatureModal() {
+    const modalElement = document.getElementById('featureModal');
 
-        const modal = document.getElementById('featureModal');
-        const box   = document.getElementById('featureModalBox');
-
-        if (!modal || !box) return;
-
-        modal.style.opacity = '1';
-        modal.style.visibility = 'visible';
-
-        setTimeout(() => {
-            box.style.transform = 'translateY(0) scale(1)';
-        }, 20);
-
-        document.body.style.overflow = 'hidden';
+    if (!modalElement) {
+        return;
     }
 
+    const storageKey = 'feature_modal_hide_until';
 
-    function closeFeatureModal() {
+    // Ambil tanggal hari ini
+    const today = new Date().toISOString().split('T')[0];
 
-        const modal = document.getElementById('featureModal');
-        const box   = document.getElementById('featureModalBox');
+    // Cek apakah user memilih "jangan tampilkan hari ini"
+    const hideUntil = localStorage.getItem(storageKey);
 
-        if (!modal || !box) return;
+    if (hideUntil !== today) {
 
-        box.style.transform = 'translateY(25px) scale(.97)';
-        modal.style.opacity = '0';
-        modal.style.visibility = 'hidden';
+        const modal = new bootstrap.Modal(modalElement);
 
-        document.body.style.overflow = '';
+        // Tampilkan modal
+        modal.show();
 
     }
 
 
-    // Tutup menggunakan tombol ESC
-    document.addEventListener('keydown', function(event) {
+    // Checkbox
+    const checkbox = document.getElementById('dontShowToday');
 
-        if (event.key === 'Escape') {
-            closeFeatureModal();
-        }
+    if (checkbox) {
 
-    });
+        checkbox.addEventListener('change', function () {
 
+            if (this.checked) {
 
-    // Tutup jika klik area gelap di luar modal
-    document.getElementById('featureModal')?.addEventListener(
-        'click',
-        function(event) {
+                // Simpan tanggal hari ini
+                localStorage.setItem(storageKey, today);
 
-            if (event.target === this) {
-                closeFeatureModal();
+            } else {
+
+                // Hapus jika checkbox dibatalkan
+                localStorage.removeItem(storageKey);
+
             }
 
-        }
-    );
+        });
+
+    }
 
 
-    // Tampilkan otomatis ketika halaman selesai dimuat
-    document.addEventListener('DOMContentLoaded', function() {
-
-        setTimeout(function() {
-            openFeatureModal();
-        }, 250);
-
-    });
-
+    // Ketika modal ditutup tanpa checkbox,
+    // besok tetap akan muncul kembali.
+});
 </script>
+
 
 @endsection
