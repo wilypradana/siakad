@@ -14,9 +14,6 @@
        <button type="button" class="btn btn-success shadow-sm fw-bold me-2" data-bs-toggle="modal" data-bs-target="#modalImportExcel">
             <i class="fas fa-file-excel me-1"></i> Import Excel
         </button>
-          <a href="https://docs.google.com/spreadsheets/d/1vI3RD0maYkxr03JpzBd-HlAbkCE8xfSG/edit?usp=drive_link&ouid=114853339111635132849&rtpof=true&sd=true" class="btn btn-success shadow-sm fw-bold me-2" >
-            <i class="fas fa-file-excel me-1"></i> format Excel DOWNLOAD
-</a>
        <button type="button" class="btn btn-warning shadow-sm fw-bold me-2" data-bs-toggle="modal" data-bs-target="#modalSalinSoal">
             <i class="fas fa-copy me-1"></i> Salin Soal
         </button>

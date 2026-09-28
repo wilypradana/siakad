@@ -1,9 +1,9 @@
 <?php
 
 namespace App\Http\Controllers;
+use Maatwebsite\Excel\Facades\Excel;
 
 use App\Imports\SoalImport;
-use Maatwebsite\Excel\Facades\Excel;
 use App\Models\Soal;
 use App\Models\Ujian;
 use Illuminate\Http\Request;
@@ -133,22 +133,30 @@ class SoalController extends Controller
         return back()->with('success', 'Soal berhasil direferensikan dari kelas lain!');
     }
 
-    public function importExcel(Request $request, $ujian_id)
-    {
-        $request->validate([
-            'file_excel' => 'required|mimes:xlsx,xls,csv|max:2048'
-        ]);
+   public function importExcel(Request $request, $ujian_id)
+{
+    $request->validate([
+        'file_excel' => 'required|mimes:xlsx,xls,csv|max:2048'
+    ]);
 
-        try {
-            // Jalankan proses import
-            Excel::import(new SoalImport($ujian_id), $request->file('file_excel'));
-            
-            return back()->with('success', 'Soal dari Excel berhasil diimpor!');
-        } catch (\Exception $e) {
-            // Menangkap error jika format Excel tidak sesuai
-            return back()->with('error', 'Gagal mengimpor data! Pastikan judul kolom (Header) Excel sudah benar (pertanyaan, opsi_a, kunci_jawaban, dll). Detail: ' . $e->getMessage());
-        }
+    try {
+        Excel::import(
+            new SoalImport($ujian_id),
+            $request->file('file_excel')
+        );
+
+        return back()->with('success', 'Soal dari Excel berhasil diimpor!');
+    } catch (\Throwable $e) {
+
+        return back()->with(
+            'error',
+            'Gagal mengimpor: ' . $e->getMessage() .
+            ' | File: ' . $e->getFile() .
+            ' | Line: ' . $e->getLine()
+        );
     }
+}
+
 
      public function edit($id)
     {

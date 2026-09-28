@@ -16,27 +16,39 @@ class SoalImport implements ToCollection, WithHeadingRow
         $this->ujian_id = $ujian_id;
     }
 
-    public function collection(Collection $rows)
-    {
-        $ujian = Ujian::find($this->ujian_id);
+   public function collection(Collection $rows)
+{
+    $ujian = Ujian::findOrFail($this->ujian_id);
 
-        foreach ($rows as $row) {
-            // Lewati baris jika pertanyaan kosong
-            if (!isset($row['pertanyaan'])) {
+    foreach ($rows as $index => $row) {
+
+        try {
+
+            if (empty($row['pertanyaan'])) {
                 continue;
-            }$soal = Soal::create([
-                'ujian_id'      => $this->ujian_id, // <-- TAMBAHKAN BARIS INI
+            }
+
+            $soal = Soal::create([
+                'ujian_id'      => $this->ujian_id,
                 'pertanyaan'    => $row['pertanyaan'],
-                'opsi_a'        => $row['opsi_a'],
-                'opsi_b'        => $row['opsi_b'],
-                'opsi_c'        => $row['opsi_c'],
-                'opsi_d'        => $row['opsi_d'],
+                'opsi_a'        => $row['opsi_a'] ?? '',
+                'opsi_b'        => $row['opsi_b'] ?? '',
+                'opsi_c'        => $row['opsi_c'] ?? '',
+                'opsi_d'        => $row['opsi_d'] ?? '',
                 'opsi_e'        => $row['opsi_e'] ?? null,
-                'kunci_jawaban' => strtoupper($row['kunci_jawaban']),
+                'kunci_jawaban' => strtoupper(trim($row['kunci_jawaban'] ?? '')),
             ]);
 
-            // 2. Tempelkan ID soal ke ujian via pivot
             $ujian->soals()->attach($soal->id);
+
+        } catch (\Throwable $e) {
+
+            throw new \Exception(
+                'Error pada baris Excel ' . ($index + 2) .
+                ': ' . $e->getMessage()
+            );
         }
     }
+}
+
 }
