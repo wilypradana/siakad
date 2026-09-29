@@ -51,11 +51,8 @@
                         <td><span class="fw-bold text-primary">{{ $mapel->kode_mapel }}</span></td>
                         <td class="fw-semibold">{{ $mapel->nama_mapel }}</td>
                         <td>
-                            @if(strtolower($mapel->kelompok) == 'umum')
-                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary">UMUM</span>
-                            @else
-                                <span class="badge bg-warning bg-opacity-10 text-dark border border-warning">KEJURUAN</span>
-                            @endif
+                            {{$mapel->kelompok}}
+                            
                         </td>
                         <td>
                             <span class="badge bg-secondary">{{ $mapel->jurusan_mapel ?? 'UMUM' }}</span>
@@ -98,6 +95,7 @@
                                                 <select name="kelompok" class="form-select" required>
                                                     <option value="Umum" {{ strtolower($mapel->kelompok) == 'umum' ? 'selected' : '' }}>Umum</option>
                                                     <option value="Kejuruan" {{ strtolower($mapel->kelompok) == 'kejuruan' ? 'selected' : '' }}>Kejuruan / Pilihan</option>
+                                                    <option value="Mulok" {{ strtolower($mapel->kelompok) == 'mulok' ? 'selected' : '' }}>Muatan Lokal</option>
                                                 </select>
                                             </div>
                                             <div class="col-6 mb-3">
@@ -170,6 +168,7 @@
                             <select name="kelompok" class="form-select" required>
                                 <option value="Umum">Umum</option>
                                 <option value="Kejuruan">Kejuruan / Pilihan</option>
+                                <option value="Mulok">Muatana Lokal</option>
                             </select>
                         </div>
                         <div class="col-6 mb-3">

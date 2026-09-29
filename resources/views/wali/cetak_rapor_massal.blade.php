@@ -15,7 +15,7 @@
     .lembar-rapor {
         width: 194mm;
         margin: 0 auto 30px auto;
-        font-size: var(--fs, 13px);
+        font-size: var(--fs, 11px);
     }
     .lembar-rapor .small { font-size: 1em !important; }
 
@@ -58,7 +58,7 @@
     .signature-section > .text-end { margin-bottom: 0.8em !important; padding-right: 2em !important; }
     .signature-section .row.text-center.mb-4 { margin-bottom: 0.5em !important; }
     .signature-section p { font-size: 1em !important; line-height: 1.2 !important; }
-    .signature-section .mb-5 { margin-bottom: 3em !important; }
+    .signature-section .mb-5 { margin-bottom: 4em !important; }
     .signature-section .row.text-center.mt-3 { margin-top: 0.5em !important; }
 
     .editable-date {
@@ -173,46 +173,177 @@
                             @if(!$is_sts_rapor) <th width="50%">Capaian Kompetensi</th> @endif
                         </tr>
                     </thead>
-                    <tbody>
-                        @php 
-                            $mapel_ids_kelas = \Illuminate\Support\Facades\DB::table('pembelajarans')->where('kelas_id', $siswa->kelas_id)->pluck('mapel_id')->toArray();
-                            if (empty($mapel_ids_kelas)) {
-                                $mapel_ids_kelas = \App\Models\Ujian::where('kelas_id', $siswa->kelas_id)->pluck('mapel_id')->toArray();
-                            }
-                            $semua_mapel = \App\Models\Mapel::whereIn('id', $mapel_ids_kelas)->orderBy('id', 'asc')->get();
-                            
-                            $kelompokUmum = $semua_mapel->filter(function($m) { return strtolower($m->kelompok ?? '') === 'umum'; });
-                            $kelompokKejuruan = $semua_mapel->filter(function($m) { return strtolower($m->kelompok ?? '') === 'kejuruan'; });
-                        @endphp
+                   
+   <tbody>
+    @php
+        $no = 1;
 
-                        @if($kelompokUmum->count() > 0)
-                            <tr class="bg-group"><td colspan="{{ $is_sts_rapor ? 3 : 4 }}">Kelompok Mata Pelajaran Umum</td></tr>
-                            @php $no = 1; @endphp
-                            @foreach($kelompokUmum as $mapel)
-                                @php $nilai = $data_nilai->firstWhere('mapel_id', $mapel->id); @endphp
-                                <tr>
-                                    <td class="text-center">{{ $no++ }}</td>
-                                    <td class="fw-semibold">{{ ucwords(strtolower($mapel->nama_mapel)) }}</td>
-                                    <td class="text-center fw-bold fs-6 {{ !$nilai ? 'text-danger' : '' }}">{{ $nilai ? ($is_sts_rapor ? $nilai->nilai_ujian : $nilai->nilai_akhir) : '-' }}</td>
-                                    @if(!$is_sts_rapor) <td style="font-size: 0.8rem; padding: 6px;">{{ $nilai ? 'Menunjukkan penguasaan yang baik dalam kompetensi ' . strtolower($mapel->nama_mapel) . '.' : 'Belum dinilai' }}</td> @endif
-                                </tr>
-                            @endforeach
-                        @endif
+        $mapel_ids_kelas = \Illuminate\Support\Facades\DB::table('pembelajarans')
+            ->where('kelas_id', $siswa->kelas_id)
+            ->pluck('mapel_id')
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
 
-                        @if($kelompokKejuruan->count() > 0)
-                            <tr class="bg-group"><td colspan="{{ $is_sts_rapor ? 3 : 4 }}">Kelompok Mata Pelajaran Kejuruan / Peminatan</td></tr>
-                            @php $no = 1; @endphp
-                            @foreach($kelompokKejuruan as $mapel)
-                                @php $nilai = $data_nilai->firstWhere('mapel_id', $mapel->id); @endphp
-                                <tr>
-                                    <td class="text-center">{{ $no++ }}</td>
-                                    <td class="fw-semibold">{{ ucwords(strtolower($mapel->nama_mapel)) }}</td>
-                                    <td class="text-center fw-bold fs-6 {{ !$nilai ? 'text-danger' : '' }}">{{ $nilai ? ($is_sts_rapor ? $nilai->nilai_ujian : $nilai->nilai_akhir) : '-' }}</td>
-                                    @if(!$is_sts_rapor) <td style="font-size: 0.8rem; padding: 6px;">{{ $nilai ? 'Menunjukkan penguasaan yang baik dalam kompetensi ' . strtolower($mapel->nama_mapel) . '.' : 'Belum dinilai' }}</td> @endif
-                                </tr>
-                            @endforeach
-                        @endif
-                    </tbody>
+        if (empty($mapel_ids_kelas)) {
+            $mapel_ids_kelas = \App\Models\Ujian::where('kelas_id', $siswa->kelas_id)
+                ->pluck('mapel_id')
+                ->filter()
+                ->unique()
+                ->values()
+                ->toArray();
+        }
+
+        $semua_mapel = \App\Models\Mapel::whereIn('id', $mapel_ids_kelas)
+            ->orderBy('id', 'asc')
+            ->get();
+
+        $kelompokUmum = $semua_mapel->filter(function ($m) {
+            return strtolower(trim($m->kelompok ?? '')) === 'umum';
+        });
+
+        $kelompokKejuruan = $semua_mapel->filter(function ($m) {
+            return strtolower(trim($m->kelompok ?? '')) === 'kejuruan';
+        });
+
+        $kelompokMulok = $semua_mapel->filter(function ($m) {
+            return in_array(strtolower(trim($m->kelompok ?? '')), [
+                'mulok',
+                'muatan lokal',
+                'muatan local',
+                'lokal',
+            ]);
+        });
+    @endphp
+
+
+    {{-- ================= UMUM ================= --}}
+    @if($kelompokUmum->isNotEmpty())
+        <tr class="bg-group">
+            <td colspan="{{ $is_sts_rapor ? 3 : 4 }}">
+                Kelompok Mata Pelajaran Umum
+            </td>
+        </tr>
+
+        @foreach($kelompokUmum as $mapel)
+            @php
+                $nilai = $data_nilai->firstWhere('mapel_id', $mapel->id);
+            @endphp
+
+            <tr>
+                <td class="text-center">
+                    {{ $no++ }}
+                </td>
+
+                <td class="fw-semibold">
+                    {{ ucwords(strtolower($mapel->nama_mapel)) }}
+                </td>
+
+                <td class="text-center fw-bold fs-6 {{ !$nilai ? 'text-danger' : '' }}">
+                    {{ $nilai
+                        ? ($is_sts_rapor ? $nilai->nilai_ujian : $nilai->nilai_akhir)
+                        : '-'
+                    }}
+                </td>
+
+                @if(!$is_sts_rapor)
+                    <td style="font-size: 0.8rem; padding: 6px;">
+                        {{ $nilai
+                            ? 'Menunjukkan penguasaan yang baik dalam kompetensi ' . strtolower($mapel->nama_mapel) . '.'
+                            : 'Belum dinilai'
+                        }}
+                    </td>
+                @endif
+            </tr>
+        @endforeach
+    @endif
+
+
+    {{-- ================= KEJURUAN ================= --}}
+    @if($kelompokKejuruan->isNotEmpty())
+        <tr class="bg-group">
+            <td colspan="{{ $is_sts_rapor ? 3 : 4 }}">
+                Kelompok Mata Pelajaran Kejuruan
+            </td>
+        </tr>
+
+        @foreach($kelompokKejuruan as $mapel)
+            @php
+                $nilai = $data_nilai->firstWhere('mapel_id', $mapel->id);
+            @endphp
+
+            <tr>
+                <td class="text-center">
+                    {{ $no++ }}
+                </td>
+
+                <td class="fw-semibold">
+                    {{ ucwords(strtolower($mapel->nama_mapel)) }}
+                </td>
+
+                <td class="text-center fw-bold fs-6 {{ !$nilai ? 'text-danger' : '' }}">
+                    {{ $nilai
+                        ? ($is_sts_rapor ? $nilai->nilai_ujian : $nilai->nilai_akhir)
+                        : '-'
+                    }}
+                </td>
+
+                @if(!$is_sts_rapor)
+                    <td style="font-size: 0.8rem; padding: 6px;">
+                        {{ $nilai
+                            ? 'Menunjukkan penguasaan yang baik dalam kompetensi ' . strtolower($mapel->nama_mapel) . '.'
+                            : 'Belum dinilai'
+                        }}
+                    </td>
+                @endif
+            </tr>
+        @endforeach
+    @endif
+
+
+    {{-- ================= MUATAN LOKAL ================= --}}
+    @if($kelompokMulok->isNotEmpty())
+        <tr class="bg-group">
+            <td colspan="{{ $is_sts_rapor ? 3 : 4 }}">
+                Kelompok Mata Pelajaran Muatan Lokal
+            </td>
+        </tr>
+
+        @foreach($kelompokMulok as $mapel)
+            @php
+                $nilai = $data_nilai->firstWhere('mapel_id', $mapel->id);
+            @endphp
+
+            <tr>
+                <td class="text-center">
+                    {{ $no++ }}
+                </td>
+
+                <td class="fw-semibold">
+                    {{ ucwords(strtolower($mapel->nama_mapel)) }}
+                </td>
+
+                <td class="text-center fw-bold fs-6 {{ !$nilai ? 'text-danger' : '' }}">
+                    {{ $nilai
+                        ? ($is_sts_rapor ? $nilai->nilai_ujian : $nilai->nilai_akhir)
+                        : '-'
+                    }}
+                </td>
+
+                @if(!$is_sts_rapor)
+                    <td style="font-size: 0.8rem; padding: 6px;">
+                        {{ $nilai
+                            ? 'Menunjukkan penguasaan yang baik dalam kompetensi ' . strtolower($mapel->nama_mapel) . '.'
+                            : 'Belum dinilai'
+                        }}
+                    </td>
+                @endif
+            </tr>
+        @endforeach
+    @endif
+
+</tbody>
                 </table>
             </div>
 
@@ -228,7 +359,7 @@
                     <div class="col-6">
                         <p class="mb-5">Wali Kelas,</p>
                         <p class="mb-0 fw-bold text-decoration-underline">{{ auth()->user()->name ?? 'Wali Kelas' }}</p>
-                        <p class="mb-0 text-muted" style="font-size: 0.75rem;">NIP. ........................................</p>
+                        
                     </div>
                 </div>
                 
