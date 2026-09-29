@@ -4,20 +4,100 @@
     <meta charset="UTF-8">
     <title>RAPOR - {{ strtoupper($siswa->nama) }}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <style>
-        body { font-family: 'Times New Roman', Times, serif; color: #000; background-color: #fff; }
-        .table-rapor th, .table-rapor td { border: 1px solid #000 !important; padding: 6px 8px !important; }
-        .signature-section { margin-top: 30px; page-break-inside: avoid; }
-        .editable-date { border-bottom: 1px dashed #000; padding: 0 4px; cursor: pointer; background-color: #fff9db; transition: 0.3s; }
-        .editable-date:hover { background-color: #ffe066; }
-        .bg-group { background-color: #f2f2f2 !important; font-weight: bold; }
-        @media print {
-            @page { size: A4; margin: 1.5cm; }
-            body { padding: 0 !important; }
-            .editable-date { border-bottom: none !important; background-color: transparent !important; }
-            .no-print { display: none !important; }
+ <style>
+    body {
+        font-family: 'Times New Roman', Times, serif;
+        color: #000;
+        background: #fff;
+    }
+
+    /* Semua ukuran memakai em, mengikuti --fs yang diatur script */
+    .page-break {
+        width: 194mm;
+        margin: 0 auto;
+        font-size: var(--fs, 13px);
+    }
+    .page-break .small { font-size: 1em !important; }
+
+    .page-break > .text-center { margin-bottom: 0.8em !important; }
+    .page-break > .text-center h5 { font-size: 1.25em; margin-bottom: 0.2em; }
+    .page-break > .text-center h6 { font-size: 1.1em; margin-bottom: 0.2em; }
+    .page-break > .text-center hr { margin: 0.4em 0 !important; }
+
+    .page-break > .row.small.mb-4 { margin-bottom: 0.8em !important; }
+    .page-break > .row.small.mb-4 table { font-size: 1em; }
+    .page-break > .row.small.mb-4 td { padding: 0.15em 0.3em !important; }
+
+    .page-break > .mb-4 { margin-bottom: 0 !important; }
+    .page-break > .mb-4 h6 { font-size: 1.1em !important; margin-bottom: 0.4em !important; }
+
+    .table-rapor {
+        width: 100%;
+        font-size: 1em !important;
+        margin-bottom: 0 !important;
+    }
+    .table-rapor th,
+    .table-rapor td {
+        border: 1px solid #000 !important;
+        padding: 0.3em 0.4em !important;
+        line-height: 1.2 !important;
+    }
+    .table-rapor .fs-6 { font-size: 1.05em !important; }
+    .table-rapor td[style] { font-size: 0.95em !important; padding: 0.3em 0.4em !important; }
+
+    .bg-group {
+        background-color: #f2f2f2 !important;
+        font-weight: bold;
+    }
+
+    .signature-section {
+        margin-top: 1em !important;
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+    .signature-section > .text-end { margin-bottom: 0.8em !important; padding-right: 2em !important; }
+    .signature-section .row.text-center.mb-4 { margin-bottom: 0.5em !important; }
+    .signature-section p { font-size: 1em !important; line-height: 1.2 !important; }
+    .signature-section .mb-5 { margin-bottom: 3em !important; }
+    .signature-section .row.text-center.mt-3 { margin-top: 0.5em !important; }
+
+    .editable-date {
+        border-bottom: 1px dashed #000;
+        padding: 0 4px;
+        cursor: pointer;
+        background-color: #fff9db;
+    }
+
+    @media print {
+        @page {
+            size: A4 portrait;
+            margin: 8mm;
         }
-    </style>
+
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #fff !important;
+        }
+
+        .no-print { display: none !important; }
+
+        .page-break { margin: 0 auto !important; }
+
+        .table-rapor,
+        .bg-group {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .editable-date {
+            border: none !important;
+            background: transparent !important;
+        }
+    }
+</style>
+
+
 </head>
 <body class="p-4 bg-white">
     
@@ -198,5 +278,24 @@
             </div>
         </div>
     </div>
+
+   <script>
+    const halaman = document.querySelector('.page-break');
+
+    function fitSatuHalaman() {
+        // Tinggi area cetak A4: 297mm - 16mm margin, dikurangi ruang aman
+        const maxTinggi = (281 * 96 / 25.4) - 8;
+
+        // Mulai dari font besar, kecilkan sampai muat satu halaman
+        for (let fs = 16; fs >= 7; fs -= 0.25) {
+            halaman.style.setProperty('--fs', fs + 'px');
+            if (halaman.scrollHeight <= maxTinggi) break;
+        }
+    }
+
+    window.addEventListener('beforeprint', fitSatuHalaman);
+    window.addEventListener('load', fitSatuHalaman);
+</script>
 </body>
+
 </html>

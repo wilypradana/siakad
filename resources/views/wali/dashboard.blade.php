@@ -9,17 +9,32 @@
         <p class="text-muted mb-0">Kelas: <strong class="text-primary">{{ $kelas_wali->nama_kelas }} ({{ $kelas_wali->jurusan }})</strong></p>
     </div>
 </div>
-    <!-- Form Pratinjau Legger -->
-    <div class="bg-white p-2 rounded shadow-sm border">
-        <form action="{{ route('wali.lihat_legger') }}" method="GET" class="d-flex gap-2 mb-0">
-            <select name="jenis_ujian_id" class="form-select form-select-sm border-primary" required>
-                <option value="">-- Legger Nilai --</option>
+    <!-- Aksi Kelas Terpadu (Legger & Cetak Massal) -->
+    <div class="bg-white p-3 rounded shadow-sm border mb-4">
+        <form action="{{ route('wali.lihat_legger') }}" method="GET" class="d-flex flex-column flex-md-row gap-2 mb-0 align-items-md-center">
+            @csrf <!-- Diperlukan untuk tombol Cetak (POST) -->
+            
+            <label class="fw-bold text-nowrap mb-0 me-md-2">Tindakan Kelas:</label>
+            
+            <select name="jenis_ujian_id" class="form-select form-select-sm border-secondary" style="max-width: 300px;" required>
+                <option value="">-- Pilih Jenis Ujian --</option>
                 @foreach(App\Models\JenisUjian::all() as $jenis)
                     <option value="{{ $jenis->id }}">{{ $jenis->nama_jenis }}</option>
                 @endforeach
             </select>
-            <button type="submit" class="btn btn-sm btn-primary text-nowrap fw-bold">
+
+            <!-- Tombol 1: Menggunakan setting bawaan form (GET ke route lihat_legger) -->
+            <button type="submit" class="btn btn-sm btn-primary text-nowrap fw-bold shadow-sm">
                 <i class="fas fa-table me-1"></i> Lihat Legger
+            </button>
+
+            <!-- Tombol 2: Mengubah sifat form (POST ke route cetak_rapor_massal dan buka di tab baru) -->
+            <button type="submit" 
+                    formaction="{{ route('wali.cetak_rapor_massal') }}" 
+                    formmethod="POST" 
+                    formtarget="_blank"
+                    class="btn btn-sm btn-success text-nowrap fw-bold shadow-sm">
+                <i class="fas fa-print me-1"></i> Cetak Semua Siswa
             </button>
         </form>
     </div>
@@ -30,6 +45,7 @@
     <div class="card-header bg-white pt-4 pb-0 border-0">
         <h5 class="fw-bold"><i class="fas fa-users text-primary me-2"></i> Daftar Siswa & Cetak Rapor</h5>
     </div>
+    
     <div class="card-body">
         <div class="table-responsive">
             <table class="table table-hover align-middle">

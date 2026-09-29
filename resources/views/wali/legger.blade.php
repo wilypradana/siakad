@@ -10,6 +10,7 @@
         <p class="text-muted mb-0">Ujian: <strong class="text-primary">{{ $jenis_ujian->nama_jenis }}</strong></p>
     </div>
     
+    
     <form action="{{ route('wali.export_rekap') }}" method="POST">
         @csrf
         <input type="hidden" name="jenis_ujian_id" value="{{ $jenis_ujian->id }}">
@@ -17,7 +18,7 @@
             <i class="fas fa-file-excel me-1"></i> Download Legger (Excel)
         </button>
     </form>
-</div>
+   </div>
 
 @php
     // 1. Ambil ID semua siswa di kelas ini

@@ -127,5 +127,30 @@ class WaliKelasController extends Controller
         // Panggil library Maatwebsite Excel untuk men-download file .xlsx
         return Excel::download(new \App\Exports\LeggerExport($kelas_wali->id, $request->jenis_ujian_id), $nama_file);
     }
+
+    public function cetakRaporMassal(Request $request)
+    {
+        $request->validate([
+            'jenis_ujian_id' => 'required',
+        ]);
+
+        $guru = Guru::where('user_id', Auth::id())->first();
+        $kelas_wali = Kelas::where('guru_id', $guru->id)->first();
+        $jenis_ujian = JenisUjian::findOrFail($request->jenis_ujian_id);
+
+        // Ambil semua siswa di kelas ini, urutkan berdasarkan nama
+        $kumpulan_siswa = Siswa::with('kelas')
+                            ->where('kelas_id', $kelas_wali->id)
+                            ->orderBy('nama', 'asc')
+                            ->get();
+        
+        // Optimasi Query: Ambil semua nilai dari seluruh siswa di kelas ini sekaligus
+        $semua_nilai = Nilai::with('mapel')
+                           ->whereIn('siswa_id', $kumpulan_siswa->pluck('id'))
+                           ->where('jenis_ujian_id', $jenis_ujian->id)
+                           ->get();
+
+        return view('wali.cetak_rapor_massal', compact('kumpulan_siswa', 'jenis_ujian', 'semua_nilai'));
+    }
     
 }

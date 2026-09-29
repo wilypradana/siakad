@@ -142,6 +142,7 @@ Route::middleware(['auth', 'role:admin,guru'])->group(function () {
         Route::post('/rapor/cetak', [WaliKelasController::class, 'cetakRapor'])->name('wali.cetak_rapor');
         Route::get('/wali-kelas/legger', [WaliKelasController::class, 'lihatLegger'])->name('wali.lihat_legger');
         Route::post('/export-rekap', [WaliKelasController::class, 'exportRekap'])->name('wali.export_rekap');
+        Route::post('/rapor/cetak-massal', [WaliKelasController::class, 'cetakRaporMassal'])->name('wali.cetak_rapor_massal');
     });
 });
 
