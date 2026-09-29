@@ -305,7 +305,7 @@
     {{-- ================= MUATAN LOKAL ================= --}}
     @if($kelompokMulok->isNotEmpty())
         <tr class="bg-group">
-            <p>anjai</p>
+        
             <td colspan="{{ $is_sts_rapor ? 3 : 4 }}">
                 Kelompok Mata Pelajaran Muatan Lokal
             </td>
