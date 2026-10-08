@@ -73,7 +73,7 @@
                         {{ $guru->nama }} 👋
                     </h1>
 
-                    <p class="mb-3 text-white-50">
+                    <p class="mb-3 text-white-80">
                         Kelola ujian, soal, nilai, dan aktivitas pembelajaran
                         Anda dari satu tempat.
                     </p>
@@ -138,6 +138,119 @@
     @endif
 
 
+    
+
+    {{-- ========================================================
+        FEATURE UPDATE BANNER
+    ========================================================= --}}
+    <div
+        class="rounded-4 overflow-hidden mb-4 shadow-sm"
+        style="
+            background:
+                radial-gradient(circle at 90% 20%, rgba(255,255,255,.12), transparent 20%),
+                linear-gradient(135deg,#111827,#312e81 55%,#4c1d95);
+        "
+    >
+
+        <div class="p-4 p-lg-5 text-white">
+
+            <div class="row align-items-center">
+
+                <div class="col-lg-8">
+
+                    <div
+                        class="d-inline-flex align-items-center gap-2 rounded-pill px-3 py-2 mb-3"
+                        style="background:rgba(255,255,255,.10);"
+                    >
+                        <span class="text-warning">
+                            <i class="fas fa-sparkles"></i>
+                        </span>
+
+                        <span class="small fw-bold">
+                            UPDATE TERBARU
+                        </span>
+                    </div>
+
+                    <h3 class="fw-bold mb-2">
+                        Pengelolaan Ujian Kini Lebih Cerdas 🚀
+                    </h3>
+
+                    <p class="text-white-50 mb-4" style="max-width:650px;">
+                        Berbagai fitur baru telah hadir untuk membantu
+                        Bapak/Ibu mengelola soal, timer, nilai, dan rekap
+                        dengan lebih cepat dan praktis.
+                    </p>
+
+                    <div class="d-flex flex-wrap gap-2">
+
+                        <span class="badge rounded-pill px-3 py-2"
+                              style="background:rgba(255,255,255,.10);">
+                            <i class="fas fa-database me-1"></i>
+                            Bank Soal
+                        </span>
+
+                        <span class="badge rounded-pill px-3 py-2"
+                              style="background:rgba(255,255,255,.10);">
+                            <i class="fas fa-file-excel me-1"></i>
+                            Import Excel
+                        </span>
+
+                        <span class="badge rounded-pill px-3 py-2"
+                              style="background:rgba(255,255,255,.10);">
+                            <i class="fas fa-stopwatch me-1"></i>
+                            Smart Timer
+                        </span>
+
+                        <span class="badge rounded-pill px-3 py-2"
+                              style="background:rgba(255,255,255,.10);">
+                            <i class="fas fa-print me-1"></i>
+                            Cetak A4
+                        </span>
+                        <span class="badge rounded-pill px-3 py-2"
+                              style="background:rgba(255,255,255,.10);">
+                            <i class="fas fa-book me-1"></i>
+                            Absensi Siswa
+                        </span>
+                        <span class="badge rounded-pill px-3 py-2"
+                              style="background:rgba(255,255,255,.10);">
+                            <i class="fas fa-book me-1"></i>
+                            Raport SAS & SAT
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-lg-4 d-none d-lg-flex justify-content-end">
+
+                    <div
+                        class="text-center rounded-4 p-4"
+                        style="
+                            width:190px;
+                            background:rgba(255,255,255,.07);
+                            border:1px solid rgba(255,255,255,.10);
+                        "
+                    >
+                        <i class="fas fa-rocket mb-3"
+                           style="font-size:3rem;"></i>
+
+                        <div class="fw-bold">
+                            7 Fitur Baru
+                        </div>
+
+                        <small class="text-white-50">
+                            Siap digunakan
+                        </small>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
     {{-- ========================================================
         QUICK ACCESS
     ========================================================= --}}
@@ -155,7 +268,6 @@
         </div>
 
     </div>
-
 
     <div class="row g-3 mb-4">
 
@@ -247,106 +359,7 @@
     </div>
 
 
-    {{-- ========================================================
-        FEATURE UPDATE BANNER
-    ========================================================= --}}
-    <div
-        class="rounded-4 overflow-hidden mb-4 shadow-sm"
-        style="
-            background:
-                radial-gradient(circle at 90% 20%, rgba(255,255,255,.12), transparent 20%),
-                linear-gradient(135deg,#111827,#312e81 55%,#4c1d95);
-        "
-    >
-
-        <div class="p-4 p-lg-5 text-white">
-
-            <div class="row align-items-center">
-
-                <div class="col-lg-8">
-
-                    <div
-                        class="d-inline-flex align-items-center gap-2 rounded-pill px-3 py-2 mb-3"
-                        style="background:rgba(255,255,255,.10);"
-                    >
-                        <span class="text-warning">
-                            <i class="fas fa-sparkles"></i>
-                        </span>
-
-                        <span class="small fw-bold">
-                            UPDATE TERBARU
-                        </span>
-                    </div>
-
-                    <h3 class="fw-bold mb-2">
-                        Pengelolaan Ujian Kini Lebih Cerdas 🚀
-                    </h3>
-
-                    <p class="text-white-50 mb-4" style="max-width:650px;">
-                        Berbagai fitur baru telah hadir untuk membantu
-                        Bapak/Ibu mengelola soal, timer, nilai, dan rekap
-                        dengan lebih cepat dan praktis.
-                    </p>
-
-                    <div class="d-flex flex-wrap gap-2">
-
-                        <span class="badge rounded-pill px-3 py-2"
-                              style="background:rgba(255,255,255,.10);">
-                            <i class="fas fa-database me-1"></i>
-                            Bank Soal
-                        </span>
-
-                        <span class="badge rounded-pill px-3 py-2"
-                              style="background:rgba(255,255,255,.10);">
-                            <i class="fas fa-file-excel me-1"></i>
-                            Import Excel
-                        </span>
-
-                        <span class="badge rounded-pill px-3 py-2"
-                              style="background:rgba(255,255,255,.10);">
-                            <i class="fas fa-stopwatch me-1"></i>
-                            Smart Timer
-                        </span>
-
-                        <span class="badge rounded-pill px-3 py-2"
-                              style="background:rgba(255,255,255,.10);">
-                            <i class="fas fa-print me-1"></i>
-                            Cetak A4
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-                <div class="col-lg-4 d-none d-lg-flex justify-content-end">
-
-                    <div
-                        class="text-center rounded-4 p-4"
-                        style="
-                            width:190px;
-                            background:rgba(255,255,255,.07);
-                            border:1px solid rgba(255,255,255,.10);
-                        "
-                    >
-                        <i class="fas fa-rocket mb-3"
-                           style="font-size:3rem;"></i>
-
-                        <div class="fw-bold">
-                            7 Fitur Baru
-                        </div>
-
-                        <small class="text-white-50">
-                            Siap digunakan
-                        </small>
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-    </div>
+    
 
 
     {{-- ========================================================
@@ -483,9 +496,7 @@
 
                             <td>
 
-                                <span
-                                    class="badge rounded-pill bg-light text-dark border px-3 py-2"
-                                >
+                                <span class="badge rounded-pill bg-light text-dark border px-3 py-2">
                                     <i class="fas fa-users me-1 text-primary"></i>
                                     {{ $jadwal->kelas->nama_kelas }}
                                 </span>
@@ -494,14 +505,15 @@
 
 
                             <td class="text-center">
-
-                                <a
-                                    href="{{ route('guru.input_nilai', [
+                            <!-- Tombol Absensi -->
+                                    <a href="{{ route('guru.absensi', ['kelas_id' => $jadwal->kelas_id, 'mapel_id' => $jadwal->mapel_id]) }}" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm">
+                                        <i class="fas fa-user-check me-1"></i> Absensi
+                                    </a>
+                                <a href="{{ route('guru.input_nilai', [
                                         'kelas_id' => $jadwal->kelas_id,
                                         'mapel_id' => $jadwal->mapel_id
                                     ]) }}"
-                                    class="btn btn-sm btn-primary rounded-pill px-4 shadow-sm"
-                                >
+                                    class="btn btn-sm btn-primary rounded-pill px-4 shadow-sm">
                                     <i class="fas fa-edit me-1"></i>
                                     Input Nilai
                                 </a>

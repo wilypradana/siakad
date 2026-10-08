@@ -5,7 +5,7 @@
 @section('content')
 <div class="mb-4">
     <a href="{{ route('guru.dashboard') }}" class="btn btn-secondary btn-sm mb-3"><i class="fas fa-arrow-left"></i> Kembali</a>
-    <h2 class="fw-bold">Input Nilai: {{ $mapel->nama_mapel }}</h2>
+    <h2 class="fw-bold">Input Nilai & Deskripsi TP: {{ $mapel->nama_mapel }}</h2>
 </div>
 
 <div class="card shadow-sm border-0" style="border-radius: 15px;">
@@ -25,7 +25,7 @@
             </div>
             <div class="col-auto">
                 <span class="badge bg-light text-primary border border-primary p-2">
-                    <i class="fas fa-info-circle"></i> Input nilai untuk rapor yang dipilih
+                    <i class="fas fa-info-circle"></i> Input nilai dan deskripsi TP untuk rapor yang dipilih
                 </span>
             </div>
         </form>
@@ -37,7 +37,6 @@
             <input type="hidden" name="jenis_ujian_id" value="{{ $jenis_terpilih }}">
             
             @php
-                // Cek apakah ujian yang dipilih adalah STS (berdasarkan kata kuncinya)
                 $nama_jenis_terpilih = strtolower(\App\Models\JenisUjian::find($jenis_terpilih)->nama_jenis ?? '');
                 $is_sts = strpos($nama_jenis_terpilih, 'tengah semester') !== false;
             @endphp
@@ -46,25 +45,26 @@
                 <table class="table table-hover align-middle border">
                     <thead class="table-primary text-center">
                         <tr>
-                            <th rowspan="2" class="align-middle">No</th>
-                            <th rowspan="2" class="align-middle text-start">Nama Siswa</th>
+                            <th rowspan="2" class="align-middle" width="5%">No</th>
+                            <th rowspan="2" class="align-middle text-start" width="20%">Nama Siswa</th>
                             
                             @if(!$is_sts)
                                 <th colspan="3">Nilai Sumatif Lingkup Materi</th>
                             @endif
                             
-                            <th rowspan="2" class="align-middle">Nilai Murni Ujian ({{ strtoupper($nama_jenis_terpilih) }})</th>
+                            <th rowspan="2" class="align-middle" width="10%">Nilai Ujian</th>
                             
                             @if(!$is_sts)
-                                <th rowspan="2" class="align-middle">Nilai Rapor Akhir</th>
+                                <th rowspan="2" class="align-middle" width="10%">Nilai Akhir</th>
+                                <th rowspan="2" class="align-middle" width="35%">Deskripsi Capaian Kompetensi (TP Tercapai & Perlu Peningkatan)</th>
                             @endif
                         </tr>
                         
                         @if(!$is_sts)
                         <tr>
-                            <th width="100">TP 1</th>
-                            <th width="100">TP 2</th>
-                            <th width="100">TP 3</th>
+                            <th width="80">TP 1</th>
+                            <th width="80">TP 2</th>
+                            <th width="80">TP 3</th>
                         </tr>
                         @endif
                     </thead>
@@ -80,7 +80,6 @@
                                 <td><input type="number" name="nilai[{{ $siswa->id }}][s2]" class="form-control text-center" value="{{ $n->sumatif_2 ?? '' }}" min="0" max="100"></td>
                                 <td><input type="number" name="nilai[{{ $siswa->id }}][s3]" class="form-control text-center" value="{{ $n->sumatif_3 ?? '' }}" min="0" max="100"></td>
                             @else
-                                <!-- Jika STS, paksa nilai s1, s2, s3 menjadi 0 agar rumus tidak error -->
                                 <input type="hidden" name="nilai[{{ $siswa->id }}][s1]" value="0">
                                 <input type="hidden" name="nilai[{{ $siswa->id }}][s2]" value="0">
                                 <input type="hidden" name="nilai[{{ $siswa->id }}][s3]" value="0">
@@ -90,89 +89,25 @@
                             
                             @if(!$is_sts)
                                 <td class="text-center fw-bold text-primary fs-5">{{ $n->nilai_akhir ?? '-' }}</td>
+                                <td>
+                                    <div class="mb-1">
+                                        <input type="text" name="nilai[{{ $siswa->id }}][deskripsi_tercapai]" class="form-control form-control-sm" value="{{ $n->deskripsi_tercapai ?? '' }}" placeholder="Kompetensi yang sudah tercapai...">
+                                    </div>
+                                    <div>
+                                        <input type="text" name="nilai[{{ $siswa->id }}][deskripsi_peningkatan]" class="form-control form-control-sm" value="{{ $n->deskripsi_peningkatan ?? '' }}" placeholder="Kompetensi yang perlu peningkatan...">
+                                    </div>
+                                </td>
                             @endif
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
-</div>
+            </div>
 
             <div class="text-end mt-4">
-                <button type="submit" class="btn btn-primary btn-lg px-5 shadow"><i class="fas fa-save me-2"></i> Simpan Nilai {{ \App\Models\JenisUjian::find($jenis_terpilih)->nama_jenis }}</button>
+                <button type="submit" class="btn btn-primary btn-lg px-5 shadow"><i class="fas fa-save me-2"></i> Simpan Nilai & Deskripsi TP</button>
             </div>
         </form>
     </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-
-    const inputs = document.querySelectorAll(
-        'input[name^="nilai["][type="number"]'
-    );
-
-    inputs.forEach(function (input) {
-
-        input.addEventListener('paste', function (e) {
-
-            const text = (e.clipboardData || window.clipboardData)
-                .getData('text');
-
-            // Jika hanya satu nilai biasa, biarkan browser menangani paste
-            if (!text.includes('\n') && !text.includes('\r')) {
-                return;
-            }
-
-            e.preventDefault();
-
-            // Ambil nilai per baris
-            const values = text
-                .split(/\r?\n/)
-                .map(value => value.trim())
-                .filter(value => value !== '');
-
-            // Tentukan kolom berdasarkan name input
-            const name = input.getAttribute('name');
-
-            // Contoh:
-            // nilai[12][s1]
-            // nilai[12][s2]
-            // nilai[12][s3]
-            // nilai[12][ujian]
-
-            const match = name.match(/\[([^\]]+)\]\[([^\]]+)\]/);
-
-            if (!match) {
-                return;
-            }
-
-            const kolom = match[2];
-
-            // Ambil semua input pada kolom yang sama
-            const columnInputs = Array.from(inputs).filter(function (el) {
-                const elName = el.getAttribute('name');
-                return elName.endsWith('][' + kolom + ']');
-            });
-
-            // Posisi siswa tempat paste dimulai
-            const startIndex = columnInputs.indexOf(input);
-
-            // Masukkan nilai ke bawah
-            values.forEach(function (value, index) {
-
-                const targetIndex = startIndex + index;
-
-                if (targetIndex < columnInputs.length) {
-                    columnInputs[targetIndex].value = value;
-                }
-
-            });
-
-        });
-
-    });
-
-});
-</script>
-
 @endsection

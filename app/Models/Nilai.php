@@ -10,10 +10,20 @@ class Nilai extends Model
     use HasFactory;
 
     protected $fillable = [
-        'siswa_id', 'mapel_id', 'jenis_ujian_id',
-        'sumatif_1', 'sumatif_2', 'sumatif_3', 'nilai_ujian',
-        'nilai_akhir'
-    ];
+    'siswa_id', 
+    'mapel_id', 
+    'nilai_tugas', 
+    'nilai_uts', 
+    'nilai_uas', 
+    'nilai_akhir', 
+    'jenis_ujian_id', 
+    'sumatif_1', 
+    'sumatif_2', 
+    'sumatif_3', 
+    'nilai_ujian',
+    'deskripsi_tercapai',    // Tambahkan ini
+    'deskripsi_peningkatan'  // Tambahkan ini
+];
 
     // Relasi ke Siswa
     public function siswa() { return $this->belongsTo(Siswa::class); }

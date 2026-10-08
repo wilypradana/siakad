@@ -134,6 +134,8 @@ Route::middleware(['auth', 'role:admin,guru'])->group(function () {
         Route::get('/input-nilai/{kelas_id}/{mapel_id}', [PortalGuruController::class, 'inputNilai'])->name('guru.input_nilai');
         Route::post('/simpan-nilai/{kelas_id}/{mapel_id}', [PortalGuruController::class, 'simpanNilai'])->name('guru.simpan_nilai');
         Route::get('/ujian-list', [UjianController::class, 'index'])->name('ujian.index');
+        Route::get('/absensi/{kelas_id}/{mapel_id}', [PortalGuruController::class, 'inputAbsensi'])->name('guru.absensi');
+        Route::post('/absensi/simpan/{kelas_id}/{mapel_id}', [PortalGuruController::class, 'simpanAbsensi'])->name('guru.simpan_absensi');
     });
 
     Route::prefix('wali-kelas')->group(function () {
@@ -143,6 +145,17 @@ Route::middleware(['auth', 'role:admin,guru'])->group(function () {
         Route::get('/wali-kelas/legger', [WaliKelasController::class, 'lihatLegger'])->name('wali.lihat_legger');
         Route::post('/export-rekap', [WaliKelasController::class, 'exportRekap'])->name('wali.export_rekap');
         Route::post('/rapor/cetak-massal', [WaliKelasController::class, 'cetakRaporMassal'])->name('wali.cetak_rapor_massal');
+        Route::post('/rapor/catatan/simpan', [WaliKelasController::class, 'simpanCatatan'])->name('wali.simpan_catatan');
+        
+        Route::get('/rapor/catatan/get-data', [WaliKelasController::class, 'getCatatan'])->name('wali.get_catatan');
+        // Rute untuk input catatan massal
+        Route::get('/rapor/catatan/input-massal', [WaliKelasController::class, 'inputCatatanMassal'])->name('wali.input_catatan_massal');
+        Route::post('/rapor/catatan/simpan-massal', [WaliKelasController::class, 'simpanCatatanMassal'])->name('wali.simpan_catatan_massal');
+
+        // Rute Modul Ekstrakurikuler & Prestasi
+        // Rute Modul Ekstrakurikuler & Prestasi (Massal)
+        Route::get('/rapor/ekskul-prestasi-massal', [WaliKelasController::class, 'ekskulPrestasiMassal'])->name('wali.ekskul_prestasi_massal');
+        Route::post('/rapor/ekskul-prestasi-massal', [WaliKelasController::class, 'simpanEkskulPrestasiMassal'])->name('wali.simpan_ekskul_prestasi_massal');
     });
 });
 

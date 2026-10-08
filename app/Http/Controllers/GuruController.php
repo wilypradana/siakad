@@ -205,4 +205,49 @@ class GuruController extends Controller
 
         return back()->with('success', $jumlah_terupdate . ' password guru berhasil diseragamkan dan disinkronkan menjadi NIP masing-masing!');
     }
+    public function inputAbsensi(Request $request, $kelas_id, $mapel_id)
+    {
+        $guru = auth()->user()->guru;
+        $mapel = Mapel::findOrFail($mapel_id);
+        $kelas = Kelas::findOrFail($kelas_id);
+        $data_siswa = Siswa::where('kelas_id', $kelas_id)->orderBy('nama', 'asc')->get();
+        
+        // Tanggal default hari ini jika tidak dipilih
+        $tanggal = $request->tanggal ?? date('Y-m-d');
+
+        // Ambil data absensi yang sudah ada pada tanggal tersebut
+        $absensi_existing = AbsensiSiswa::where('kelas_id', $kelas_id)
+                            ->where('mapel_id', $mapel_id)
+                            ->where('tanggal', $tanggal)
+                            ->get()
+                            ->keyBy('siswa_id');
+
+        return view('guru.input_absensi', compact('guru', 'mapel', 'kelas', 'data_siswa', 'tanggal', 'absensi_existing'));
+    }
+
+    public function simpanAbsensi(Request $request, $kelas_id, $mapel_id)
+    {
+        $guru = auth()->user()->guru;
+        $request->validate([
+            'tanggal' => 'required|date',
+            'status' => 'required|array'
+        ]);
+
+        foreach ($request->status as $siswa_id => $status_kehadiran) {
+            AbsensiSiswa::updateOrCreate(
+                [
+                    'siswa_id' => $siswa_id,
+                    'mapel_id' => $mapel_id,
+                    'tanggal' => $request->tanggal,
+                ],
+                [
+                    'kelas_id' => $kelas_id,
+                    'guru_id' => $guru->id,
+                    'status' => $status_kehadiran
+                ]
+            );
+        }
+
+        return back()->with('success', 'Absensi tanggal ' . $request->tanggal . ' berhasil disimpan!');
+    }
 }

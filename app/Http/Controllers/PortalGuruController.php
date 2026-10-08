@@ -9,6 +9,8 @@ use App\Models\Pembelajaran;
 use App\Models\Siswa;
 use App\Models\Nilai;
 use App\Models\Mapel;
+use App\Models\Kelas;
+use App\Models\AbsensiSiswa;
 use App\Models\JenisUjian; // WAJIB DIPANGGIL
 
 class PortalGuruController extends Controller
@@ -59,13 +61,17 @@ class PortalGuruController extends Controller
         $jenis_ujian = JenisUjian::findOrFail($request->jenis_ujian_id);
         $is_sts = strpos(strtolower($jenis_ujian->nama_jenis), 'tengah semester') !== false;
 
-        // 3. Looping untuk setiap siswa dan simpan nilainya
-        foreach ($request->nilai as $siswa_id => $skor) { // Gunakan $skor dari input array
+        // 3. Looping untuk setiap siswa dan simpan nilainya beserta deskripsi TP
+        foreach ($request->nilai as $siswa_id => $skor) {
             
             $s1 = $skor['s1'] ?? 0;
             $s2 = $skor['s2'] ?? 0;
             $s3 = $skor['s3'] ?? 0;
             $ujian = $skor['ujian'] ?? 0;
+
+            // Tangkap input deskripsi TP dari guru
+            $deskripsi_tercapai = $skor['deskripsi_tercapai'] ?? null;
+            $deskripsi_peningkatan = $skor['deskripsi_peningkatan'] ?? null;
 
             if ($is_sts) {
                 // Jika STS, nilai akhir mutlak mengambil nilai ujian murni
@@ -88,11 +94,64 @@ class PortalGuruController extends Controller
                     'sumatif_2' => $s2,
                     'sumatif_3' => $s3,
                     'nilai_ujian' => $ujian,
-                    'nilai_akhir' => $nilai_akhir
+                    'nilai_akhir' => $nilai_akhir,
+                    'deskripsi_tercapai' => $deskripsi_tercapai,       // Tambahan kolom TP tercapai
+                    'deskripsi_peningkatan' => $deskripsi_peningkatan // Tambahan kolom TP peningkatan
                 ]
             );
         }
 
-        return back()->with('success', 'Nilai ' . $jenis_ujian->nama_jenis . ' berhasil disimpan!');
+        return back()->with('success', 'Nilai dan Deskripsi TP ' . $jenis_ujian->nama_jenis . ' berhasil disimpan!');
+    }
+    public function inputAbsensi(Request $request, $kelas_id, $mapel_id)
+    {
+        $guru = auth()->user()->guru;
+        $mapel = Mapel::findOrFail($mapel_id);
+        $kelas = Kelas::findOrFail($kelas_id);
+        $data_siswa = Siswa::where('kelas_id', $kelas_id)->orderBy('nama', 'asc')->get();
+        
+        // Tanggal default hari ini jika tidak dipilih
+        $tanggal = $request->tanggal ?? date('Y-m-d');
+
+        // Ambil data absensi yang sudah ada pada tanggal tersebut
+        $absensi_existing = AbsensiSiswa::where('kelas_id', $kelas_id)
+                            ->where('mapel_id', $mapel_id)
+                            ->where('tanggal', $tanggal)
+                            ->get()
+                            ->keyBy('siswa_id');
+
+        return view('guru.input_absensi', compact('guru', 'mapel', 'kelas', 'data_siswa', 'tanggal', 'absensi_existing'));
+    }
+
+    public function simpanAbsensi(Request $request, $kelas_id, $mapel_id)
+    {
+        // Ubah dari auth()->user()->guru menjadi query ini agar tidak error
+        $guru = Guru::where('user_id', Auth::id())->first();
+
+        if (!$guru) {
+            return back()->with('error', 'Profil guru tidak ditemukan.');
+        }
+
+        $request->validate([
+            'tanggal' => 'required|date',
+            'status' => 'required|array'
+        ]);
+
+        foreach ($request->status as $siswa_id => $status_kehadiran) {
+            AbsensiSiswa::updateOrCreate(
+                [
+                    'siswa_id' => $siswa_id,
+                    'mapel_id' => $mapel_id,
+                    'tanggal' => $request->tanggal,
+                ],
+                [
+                    'kelas_id' => $kelas_id,
+                    'guru_id' => $guru->id,
+                    'status' => $status_kehadiran
+                ]
+            );
+        }
+
+        return back()->with('success', 'Absensi tanggal ' . $request->tanggal . ' berhasil disimpan!');
     }
 }   
