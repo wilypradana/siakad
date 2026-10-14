@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 @php
     // Deteksi apakah ini ujian baru/hasil reset dengan menghitung jumlah jawaban tersimpan
-    $jumlah_jawaban = \App\Models\JawabanSiswa::where('ujian_id', $ujian->id)
+    $jumlah_jawaban = \App\Models\JawabanSiswa::where('ujian_id',$ujian->id)
                         ->where('siswa_id', $siswa->id)
                         ->count();
 @endphp
@@ -14,45 +14,141 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@700&display=swap');
+
         /* PROTEKSI ANTI-COPY & SELECT TEXT */
         body, html { 
-            margin: 0; padding: 0; height: 100%; background-color: #f8f9fa;
-            -webkit-user-select: none; 
-            -moz-user-select: none;    
-            -ms-user-select: none;     
-            user-select: none;         
-            -webkit-touch-callout: none;
-            overflow: hidden; /* Mencegah scroll di luar iframe */
+            margin: 0; padding: 0; height: 100%; 
+            background-color: #f1f5f9; /* Slate 100 */
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;         
+            -webkit-touch-callout: none; overflow: hidden; 
         }
-        .top-bar { position: fixed; top: 0; left: 0; width: 100%; height: 60px; background: #0d6efd; color: white; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 1000; }
-        .gform-container { width: 100%; height: calc(100vh - 60px); border: none; margin-top: 60px; pointer-events: auto; }
-        .cbt-container { width: 100%; height: calc(100vh - 60px); margin-top: 60px; overflow-y: auto; padding: 20px; }
+
+        /* MODERN TOP BAR */
+        .top-bar { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 65px; 
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); 
+            color: white; display: flex; align-items: center; justify-content: space-between; 
+            padding: 0 24px; z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .gform-container { width: 100%; height: calc(100vh - 65px); border: none; margin-top: 65px; pointer-events: auto; }
+        .cbt-container { width: 100%; height: calc(100vh - 65px); margin-top: 65px; overflow-y: auto; padding: 24px; }
         .gate-center { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
         
-        /* Desain Tambahan untuk CBT */
-        .btn-nav-soal { width: 45px; height: 45px; margin: 3px; font-weight: bold; }
-        .opsi-jawaban { cursor: pointer; transition: 0.2s; border: 2px solid transparent; }
-        .opsi-jawaban:hover { background-color: #e9ecef; }
-        .opsi-jawaban.terpilih { border-color: #0d6efd; background-color: #e7f1ff; font-weight: bold; }
-        .opsi-huruf { display: inline-block; width: 30px; font-weight: bold; }
+        /* MODERN CARDS */
+        .card-modern {
+            border: none;
+            border-radius: 20px;
+            background: #ffffff;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+            transition: transform 0.3s ease;
+        }
+
+        /* OPSI JAWABAN FUTURISTIK */
+        .opsi-jawaban { 
+            cursor: pointer; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 16px;
+            background: #ffffff;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+            margin-bottom: 12px;
+        }
+        .opsi-jawaban:hover { 
+            border-color: #cbd5e1; 
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+        }
+        .opsi-jawaban.terpilih { 
+            border-color: #3b82f6; 
+            background-color: #eff6ff; 
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+        .opsi-huruf { 
+            display: inline-flex; justify-content: center; align-items: center;
+            width: 36px; height: 36px; 
+            font-weight: 700; border-radius: 10px;
+            background: #f1f5f9; color: #64748b;
+            transition: all 0.25s ease;
+        }
+        .opsi-jawaban.terpilih .opsi-huruf {
+            background: #3b82f6; color: #ffffff;
+        }
+
+        /* DIGITAL HUD TIMER */
+        .timer-box {
+            background: #0f172a;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(15, 23, 42, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        .timer-box::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, #ef4444, #f59e0b);
+        }
+        .timer-text {
+            font-family: 'Space Mono', monospace;
+            font-size: 3.2rem;
+            font-weight: 700;
+            color: #ef4444;
+            text-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+            letter-spacing: -1px;
+            line-height: 1;
+        }
+        .timer-text.blink { animation: pulse-danger 1s infinite; }
+
+        @keyframes pulse-danger {
+            0% { opacity: 1; text-shadow: 0 0 20px rgba(239, 68, 68, 0.6); }
+            50% { opacity: 0.5; text-shadow: none; }
+            100% { opacity: 1; text-shadow: 0 0 20px rgba(239, 68, 68, 0.6); }
+        }
+
+        /* GRID NAVIGASI SOAL */
+        .btn-nav-soal { 
+            width: 42px; height: 42px; margin: 4px; 
+            font-weight: 600; border-radius: 12px;
+            transition: all 0.2s;
+            display: inline-flex; justify-content: center; align-items: center;
+            padding: 0;
+        }
+        .btn-nav-soal.btn-outline-secondary { border: 2px solid #e2e8f0; color: #64748b; }
+        .btn-nav-soal.btn-outline-secondary:hover { border-color: #cbd5e1; background: #f8fafc; color: #0f172a; }
+        
+        .btn-action { border-radius: 12px; font-weight: 600; padding: 10px 24px; transition: all 0.2s; }
+
+        /* ANIMASI MUNCUL SOAL */
+        .fade-in-up { animation: fadeInUp 0.4s ease-out forwards; }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body oncontextmenu="return false;" ondragstart="return false;" onselectstart="return false;">
 
    <div class="top-bar">
-    <div class="fw-bold"><i class="fas fa-laptop-code me-2"></i> {{ $ujian->mapel->nama_mapel }}</div>
+    <div class="fw-bold fs-5 d-flex align-items-center">
+        <div class="bg-white bg-opacity-25 rounded-circle d-flex justify-content-center align-items-center me-3" style="width: 36px; height: 36px;">
+            <i class="fas fa-laptop-code text-white"></i>
+        </div>
+        {{ $ujian->mapel->nama_mapel }}
+    </div>
     
     <div class="d-flex gap-2">
-        <a href="{{ route('siswa.dashboard') }}" class="btn btn-sm btn-light text-primary fw-bold" id="btn-kembali">Kembali</a>
+        <a href="{{ route('siswa.dashboard') }}" class="btn btn-sm btn-outline-light rounded-pill fw-bold px-3 d-flex align-items-center" id="btn-kembali">Kembali</a>
         
         @if(session()->has('ujian_verified_' . $ujian->id))
             @if($ujian->metode_ujian == 'gform')
                 <form action="{{ route('siswa.ujian.selesai', $ujian->id) }}" method="POST" onsubmit="return confirm('Yakin ingin mengakhiri ujian? Pastikan jawaban Google Form sudah di-SUBMIT!')">
                     @csrf
-                    <button type="submit" class="btn btn-sm btn-success fw-bold" id="btn-selesai">Selesai Ujian</button>
+                    <button type="submit" class="btn btn-sm btn-danger rounded-pill fw-bold px-4 shadow-sm" id="btn-selesai">Akhiri Ujian</button>
                 </form>
             @else
-                <button type="button" class="btn btn-sm btn-success fw-bold" id="btn-selesai-cbt" onclick="akhiriCBT()">Selesai Ujian</button>
+                <button type="button" class="btn btn-sm btn-danger rounded-pill fw-bold px-4 shadow-sm" id="btn-selesai-cbt" onclick="akhiriCBT()">Akhiri Ujian</button>
             @endif
         @endif
     </div>
@@ -60,21 +156,33 @@
 
     @if($siswa->status_bayar == 0)
         <div class="gate-center">
-            <div class="card shadow border-0 text-center p-5" style="max-width: 500px;">
-                <i class="fas fa-lock text-danger fa-4x mb-4"></i>
-                <h3 class="fw-bold">Akses Terkunci!</h3>
-                <p>Silakan selesaikan administrasi di Tata Usaha untuk mendapatkan kode kartu ujian.</p>
+            <div class="card card-modern text-center p-5" style="max-width: 500px;">
+                <div class="mb-4">
+                    <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex justify-content-center align-items-center" style="width: 100px; height: 100px;">
+                        <i class="fas fa-lock text-danger fa-3x"></i>
+                    </div>
+                </div>
+                <h3 class="fw-bold text-dark mb-3">Akses Terkunci!</h3>
+                <p class="text-muted">Silakan selesaikan administrasi di Tata Usaha untuk mendapatkan kode kartu ujian.</p>
             </div>
         </div>
     @elseif(!session()->has('ujian_verified_' . $ujian->id))
         <div class="gate-center">
-            <div class="card shadow border-0 p-5" style="max-width: 450px;">
-                <h4 class="fw-bold text-center mb-4">Verifikasi Kode Kartu</h4>
-                @if(session('error')) <div class="alert alert-danger">{{ session('error') }}</div> @endif
+            <div class="card card-modern p-5" style="max-width: 450px; width: 100%;">
+                <div class="text-center mb-4">
+                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex justify-content-center align-items-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-qrcode text-primary fa-2x"></i>
+                    </div>
+                    <h4 class="fw-bold text-dark">Verifikasi Kartu</h4>
+                </div>
+                @if(session('error')) <div class="alert alert-danger rounded-3">{{ session('error') }}</div> @endif
                 <form action="{{ route('siswa.ujian.verifikasi', $ujian->id) }}" method="POST">
                     @csrf
-                    <input type="text" name="kode_input" class="form-control form-control-lg text-center mb-3 fw-bold" placeholder="Masukkan Kode Kartu" required>
-                    <button type="submit" class="btn btn-primary btn-lg w-100">Mulai Ujian</button>
+                    <div class="form-floating mb-4">
+                        <input type="text" name="kode_input" class="form-control fw-bold text-center fs-5 rounded-3" id="kodeInput" placeholder="Masukkan Kode Kartu" required style="letter-spacing: 2px;">
+                        <label for="kodeInput">Kode Ujian Anda</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold shadow">Verifikasi & Mulai</button>
                 </form>
             </div>
         </div>
@@ -89,53 +197,57 @@
         @else
             <!-- TAMPILAN CBT LOKAL -->
             <div class="cbt-container">
-                <div class="row">
+                <div class="row g-4">
                     <!-- Kolom Kiri: Teks Soal -->
-                    <div class="col-md-8 mb-4">
-                        <div class="card shadow border-0 h-100">
-                            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                                <h5 class="fw-bold mb-0 text-primary">Soal No. <span id="label-nomor-soal">1</span></h5>
-                                <span class="badge bg-secondary fs-6" id="label-status-jawab">Belum Dijawab</span>
+                    <div class="col-lg-8">
+                        <div class="card card-modern h-100 d-flex flex-column">
+                            <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center px-4 pt-4 pb-2">
+                                <h5 class="fw-bold mb-0 text-primary d-flex align-items-center">
+                                    <span class="bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-1 fs-6 me-2">Soal</span>
+                                    <span class="fs-4" id="label-nomor-soal">1</span>
+                                </h5>
+                                <span class="badge rounded-pill px-3 py-2 fs-6 fw-semibold" id="label-status-jawab" style="background-color: #f1f5f9; color: #64748b;">Belum Dijawab</span>
                             </div>
-                            <div class="card-body fs-5" id="area-soal">
-                                <!-- Konten soal dirender oleh JS -->
+                            
+                            <div class="card-body px-4 py-3 flex-grow-1" id="area-soal">
                                 <div class="text-center py-5 text-muted">
-                                    <i class="fas fa-spinner fa-spin fa-2x mb-3"></i><br>Menyiapkan soal ujian...
+                                    <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
+                                    <h5 class="fw-bold">Menyiapkan Database Ujian...</h5>
                                 </div>
                             </div>
-                            <div class="card-footer bg-light d-flex justify-content-between py-3">
-                                <button class="btn btn-secondary px-4 fw-bold" id="btn-prev" onclick="navigasiSoal('prev')"><i class="fas fa-arrow-left me-2"></i> Sebelumnya</button>
-                                <button class="btn btn-primary px-4 fw-bold" id="btn-next" onclick="navigasiSoal('next')">Selanjutnya <i class="fas fa-arrow-right ms-2"></i></button>
+
+                            <div class="card-footer bg-transparent border-0 px-4 pb-4 pt-2 d-flex justify-content-between">
+                                <button class="btn btn-light btn-action text-dark border shadow-sm" id="btn-prev" onclick="navigasiSoal('prev')">
+                                    <i class="fas fa-chevron-left me-2"></i> Sebelumnya
+                                </button>
+                                <button class="btn btn-primary btn-action shadow" id="btn-next" onclick="navigasiSoal('next')">
+                                    Selanjutnya <i class="fas fa-chevron-right ms-2"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
 
                     <!-- Kolom Kanan: Timer & Navigasi -->
-                    <div class="col-md-4">
-                        <!-- Kotak Timer -->
-                        <div class="card shadow border-0 mb-3">
-                            <div class="card-header bg-danger text-white text-center">
-                                <h5 class="fw-bold mb-0"><i class="fas fa-clock me-2"></i> Sisa Waktu Ujian</h5>
-                            </div>
-                            <div class="card-body text-center bg-light">
-                                <h1 id="timer-ujian" class="fw-bold text-danger mb-0" style="font-size: 3rem;">00:00:00</h1>
-                            </div>
+                    <div class="col-lg-4">
+                        <!-- Kotak Timer HUD -->
+                        <div class="timer-box p-4 mb-4 text-center">
+                            <h6 class="text-uppercase mb-2 fw-bold text-white opacity-75" style="letter-spacing: 1px;"><i class="fas fa-stopwatch me-2"></i>Sisa Waktu</h6>
+                            <div id="timer-ujian" class="timer-text">00:00:00</div>
                         </div>
 
-                        <!-- Kotak Navigasi Kotak -->
-                        <div class="card shadow border-0">
-                            <div class="card-header bg-white text-center">
-                                <h6 class="fw-bold mb-0 text-secondary">Navigasi Soal</h6>
+                        <!-- Kotak Navigasi Modern -->
+                        <div class="card card-modern">
+                            <div class="card-header bg-transparent border-0 px-4 pt-4 pb-0 text-center">
+                                <h6 class="fw-bold text-secondary text-uppercase mb-0" style="letter-spacing: 1px;">Navigasi Jawaban</h6>
                             </div>
-                            <div class="card-body">
-                                <div class="d-flex flex-wrap justify-content-center" id="kotak-navigasi">
+                            <div class="card-body p-4">
+                                <div class="d-flex flex-wrap justify-content-center mb-4" id="kotak-navigasi">
                                     <!-- Tombol kotak digenerate JS -->
                                 </div>
-                                <hr>
-                                <div class="d-flex justify-content-around small text-muted mb-3">
-                                    <div><span class="badge bg-success border border-success d-inline-block" style="width: 15px; height:15px;"></span> Sudah</div>
-                                    <div><span class="badge bg-white text-dark border border-secondary d-inline-block" style="width: 15px; height:15px;"></span> Belum</div>
-                                    <div><span class="badge bg-primary border border-primary d-inline-block" style="width: 15px; height:15px;"></span> Aktif</div>
+                                <div class="d-flex justify-content-between align-items-center bg-light rounded-3 p-3 small text-secondary fw-semibold">
+                                    <div class="d-flex align-items-center"><span class="bg-success rounded-circle me-2" style="width: 12px; height:12px;"></span> Terjawab</div>
+                                    <div class="d-flex align-items-center"><span class="bg-white border border-secondary rounded-circle me-2" style="width: 12px; height:12px;"></span> Kosong</div>
+                                    <div class="d-flex align-items-center"><span class="bg-primary rounded-circle me-2" style="width: 12px; height:12px; box-shadow: 0 0 8px rgba(13,110,253,0.5);"></span> Aktif</div>
                                 </div>
                             </div>
                         </div>
@@ -143,13 +255,11 @@
                 </div>
             </div>
             
-            <!-- Form Tersembunyi untuk Akhiri Ujian CBT -->
             <form id="form-selesai-cbt" action="{{ route('siswa.ujian.selesai', $ujian->id) }}" method="POST" style="display: none;">
                 @csrf
+                <input type="hidden" name="pelanggaran" id="input-pelanggaran-cbt" value="0">
             </form>
         @endif
-        <!-- ============================================== -->
-        
     @endif
 
 <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
@@ -158,10 +268,10 @@
     @if(session()->has('ujian_verified_' . $ujian->id))
     
     // ==========================================
-    // BAGIAN 1: SISTEM ANTI CHEAT (TETAP SAMA)
+    // BAGIAN 1: SISTEM ANTI CHEAT
     // ==========================================
     let cheatCount = 0;
-    const maxCheat = 3; 
+    const maxCheat = 2; 
     let isWarningOpen = false;
 
     const alarmSound = new Audio('https://assets.mixkit.co/active_storage/sfx/991/991-preview.mp3');
@@ -169,15 +279,12 @@
 
     function triggerSelesai(isPelanggaran = false) {
         window.onbeforeunload = null;
-        
-        // Tandai ke sistem jika ini adalah submit paksa akibat curang
         if(isPelanggaran) {
             let inputCbt = document.getElementById('input-pelanggaran-cbt');
             let inputGform = document.getElementById('input-pelanggaran-gform');
             if(inputCbt) inputCbt.value = "1";
             if(inputGform) inputGform.value = "1";
         }
-        
         @if($ujian->metode_ujian == 'gform')
             document.getElementById('form-auto-selesai').submit();
         @else
@@ -189,14 +296,13 @@
         if (isWarningOpen) return; 
         isWarningOpen = true;
         cheatCount++;
-        
         alarmSound.play().catch(e => console.log("Audio tertahan browser"));
 
         setTimeout(() => {
             if (cheatCount >= maxCheat) {
                 alert('🚨 PENTING: Anda telah mencapai batas maksimal pelanggaran (3x). Ujian dihentikan paksa dan pekerjaan Anda langsung dikumpulkan!');
                 alarmSound.pause();
-                triggerSelesai(true); // Lempar nilai TRUE untuk menandai curang
+                triggerSelesai(true);
             } else {
                 alert(`🚨 PERINGATAN KECURANGAN: ${pesan} \n\nPelanggaran: ${cheatCount} dari ${maxCheat}. Jika mencapai batas maksimal, ujian akan tertutup otomatis!`);
                 alarmSound.pause();
@@ -253,26 +359,33 @@
     document.addEventListener('DOMContentLoaded', function() {
         const overlay = document.createElement("div");
         overlay.id = "fullscreen-overlay";
-        overlay.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; display:flex; justify-content:center; align-items:center;";
+        overlay.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.98); z-index:9999; display:flex; flex-direction:column; justify-content:center; align-items:center; backdrop-filter: blur(10px);";
+        
+        const lockIcon = document.createElement("div");
+        lockIcon.innerHTML = "<i class='fas fa-shield-alt fa-4x text-primary mb-4'></i>";
         
         const btnFullscreen = document.createElement("button");
-        btnFullscreen.innerHTML = "<i class='fas fa-expand'></i> MULAI UJIAN (LAYAR PENUH)";
-        btnFullscreen.className = "btn btn-danger btn-lg shadow-lg fw-bold px-4 py-3";
+        btnFullscreen.innerHTML = "MASUK MODE UJIAN AMAN";
+        btnFullscreen.className = "btn btn-primary btn-lg rounded-pill shadow-lg fw-bold px-5 py-3 fs-5";
         
+        const textHint = document.createElement("p");
+        textHint.innerHTML = "Layar penuh diperlukan. Sistem anti-curang akan aktif.";
+        textHint.className = "text-white opacity-50 mt-4";
+
+        overlay.appendChild(lockIcon);
         overlay.appendChild(btnFullscreen);
+        overlay.appendChild(textHint);
         document.body.appendChild(overlay);
 
         btnFullscreen.addEventListener("click", function() {
             openFullscreen();
             document.getElementById('fullscreen-overlay').remove(); 
             
-            // Jika mode CBT, mulai inisialisasi soal setelah masuk fullscreen
             @if($ujian->metode_ujian == 'cbt')
                 initCBT();
             @endif
         });
     });
-    
     
     // ==========================================
     // BAGIAN 2: MESIN LOGIKA CBT LOKAL
@@ -280,12 +393,28 @@
     @if($ujian->metode_ujian == 'cbt')
         let dataSoal = [];
         let indexAktif = 0;
-        let waktuSelesai = new Date("{{ \Carbon\Carbon::parse($ujian->waktu_selesai)->format('M d, Y H:i:s') }}").getTime();
+        
+        let durasiMenit = {{ $ujian->durasi }}; 
+        let ujianId = {{ $ujian->id }};
+        let batasTutupSistem = new Date("{{ \Carbon\Carbon::parse($ujian->waktu_selesai)->format('Y-m-d\TH:i:s') }}").getTime();
+        let storageKey = "waktu_selesai_ujian_" + ujianId;
 
-        // 1. Inisialisasi CBT (Ambil soal dari server via AJAX)
+        @if($jumlah_jawaban == 0)
+            localStorage.removeItem(storageKey);
+        @endif
+
+        function formatKontenOpsi(teks) {
+            if (!teks) return '';
+            const ektensiGambar = /\.(jpg|jpeg|png|gif|webp)$/i;
+            if (ektensiGambar.test(teks.trim())) {
+                return `<img src="/uploads/soal/${teks.trim()}" class="img-fluid rounded mt-2 shadow-sm" style="max-height: 140px; object-fit: contain;">`;
+            }
+            return teks;
+        }
+
         function initCBT() {
             $.ajax({
-                url: "{{ route('siswa.ujian.get_soal', $ujian->id) }}", // ROUTE INI AKAN KITA BUAT NANTI
+                url: "{{ route('siswa.ujian.get_soal', $ujian->id) }}",
                 type: "GET",
                 success: function(response) {
                     dataSoal = response;
@@ -294,7 +423,7 @@
                         tampilkanSoal(0);
                         mulaiTimer();
                     } else {
-                        $('#area-soal').html('<div class="alert alert-danger">Maaf, guru belum memasukkan bank soal untuk ujian ini.</div>');
+                        $('#area-soal').html('<div class="alert alert-danger rounded-3">Maaf, guru belum memasukkan bank soal untuk ujian ini.</div>');
                     }
                 },
                 error: function() {
@@ -303,172 +432,95 @@
             });
         }
 
-        // 2. Merender Kotak Navigasi Soal di Sebelah Kanan
         function renderNavigasi() {
             let html = '';
             dataSoal.forEach((soal, index) => {
-                let statusClass = soal.jawaban_siswa ? 'btn-success text-white' : 'btn-outline-secondary';
+                let statusClass = soal.jawaban_siswa ? 'btn-success text-white border-success shadow-sm' : 'btn-outline-secondary';
                 html += `<button class="btn ${statusClass} btn-nav-soal" id="nav-${index}" onclick="tampilkanSoal(${index})">${index + 1}</button>`;
             });
             $('#kotak-navigasi').html(html);
         }
 
-        // 3. Menampilkan Soal di Kolom Tengah
         function tampilkanSoal(index) {
             indexAktif = index;
             let soal = dataSoal[index];
             
+            // Animasi Fade-in Modern
+            let areaSoal = $('#area-soal');
+            areaSoal.removeClass('fade-in-up');
+            void document.getElementById('area-soal').offsetWidth; 
+            areaSoal.addClass('fade-in-up');
+
             $('#label-nomor-soal').text(index + 1);
             
-            // Perbarui warna kotak navigasi yang aktif
-            $('.btn-nav-soal').removeClass('btn-primary border-3').css('border', '');$(`#nav-${index}`).addClass('btn-primary').css('border', '2px solid #000');
+            $('.btn-nav-soal').removeClass('btn-primary border-primary').css('box-shadow', 'none');$(`#nav-${index}`).addClass('btn-primary').css('box-shadow', '0 4px 12px rgba(13,110,253,0.3)');
 
-            // Render Status
             if (soal.jawaban_siswa) {
-                $('#label-status-jawab').removeClass('bg-secondary').addClass('bg-success').text('Terdijawab: ' + soal.jawaban_siswa);
+                $('#label-status-jawab').removeClass('text-secondary bg-secondary').addClass('text-success').css('background-color', '#dcfce7').html('<i class="fas fa-check-circle me-1"></i> Terdijawab: ' + soal.jawaban_siswa);
             } else {
-                $('#label-status-jawab').removeClass('bg-success').addClass('bg-secondary').text('Belum Dijawab');
+                $('#label-status-jawab').removeClass('text-success').css('background-color', '#f1f5f9').addClass('text-secondary').text('Belum Dijawab');
             }
 
-            // Render Teks Soal & Gambar
             let htmlSoal = '';
             if(soal.gambar) {
-                // Sesuaikan path gambar jika diletakkan di folder public/uploads/soal/
-                htmlSoal += `<img src="/uploads/soal/${soal.gambar}" class="img-fluid mb-4 rounded shadow-sm" style="max-height: 250px;">`;
+                htmlSoal += `<div class="text-center mb-4"><img src="/uploads/soal/${soal.gambar}" class="img-fluid rounded-4 shadow-sm border" style="max-height: 280px;"></div>`;
             }
-            htmlSoal += `<p class="mb-4">${soal.pertanyaan}</p>`;
+            htmlSoal += `<div class="fs-5 mb-4 text-dark" style="line-height: 1.6;">${soal.pertanyaan}</div>`;
 
-            // Render Pilihan Jawaban
+            // Render Opsi
             const opsi = ['A', 'B', 'C', 'D', 'E'];
             opsi.forEach(opt => {
                 let teksOpsi = soal['opsi_' + opt.toLowerCase()];
                 if(teksOpsi) {
                     let isChecked = (soal.jawaban_siswa === opt) ? 'terpilih' : '';
+                    let kontenFormatted = formatKontenOpsi(teksOpsi);
+                    
                     htmlSoal += `
-                        <div class="card mb-2 opsi-jawaban ${isChecked}" onclick="simpanJawaban(${soal.id}, '${opt}', ${index})">
-                            <div class="card-body p-3">
-                                <span class="opsi-huruf">${opt}.</span> ${teksOpsi}
+                        <div class="opsi-jawaban ${isChecked}" onclick="simpanJawaban(${soal.id}, '${opt}', ${index})">
+                            <div class="p-3 d-flex align-items-center">
+                                <span class="opsi-huruf">${opt}</span> 
+                                <div class="flex-grow-1 text-dark">${kontenFormatted}</div>
                             </div>
                         </div>
                     `;
                 }
             });
 
-            $('#area-soal').html(htmlSoal);
-
-            // Atur tombol prev/next
+            areaSoal.html(htmlSoal);
             $('#btn-prev').prop('disabled', index === 0);
             $('#btn-next').prop('disabled', index === dataSoal.length - 1);
         }
 
-        // 4. Navigasi Tombol Bawah
         function navigasiSoal(arah) {
             if (arah === 'next' && indexAktif < dataSoal.length - 1) tampilkanSoal(indexAktif + 1);
             if (arah === 'prev' && indexAktif > 0) tampilkanSoal(indexAktif - 1);
         }
 
-        // 5. Simpan Jawaban secara AJAX saat diklik
         function simpanJawaban(soal_id, jawaban, indexArr) {
-            
-            // Efek visual sementara agar terasa responsif
             $('.opsi-jawaban').removeClass('terpilih');
             $(event.currentTarget).addClass('terpilih');$.ajax({
-                url: "{{ route('siswa.ujian.simpan_jawaban', $ujian->id) }}", // ROUTE INI AKAN KITA BUAT NANTI
+                url: "{{ route('siswa.ujian.simpan_jawaban', $ujian->id) }}",
                 type: "POST",
-                data: {
-                    _token: $('meta[name="csrf-token"]').attr('content'),
-                    soal_id: soal_id,
-                    jawaban: jawaban
-                },
+                data: { _token: $('meta[name="csrf-token"]').attr('content'), soal_id: soal_id, jawaban: jawaban },
                 success: function(response) {
-                    // Update data lokal
                     dataSoal[indexArr].jawaban_siswa = jawaban;
-                    
-                    // Update warna kotak navigasi
-                    $(`#nav-${indexArr}`).removeClass('btn-outline-secondary btn-primary').addClass('btn-success text-white');
-                    $('#label-status-jawab').removeClass('bg-secondary').addClass('bg-success').text('Terdijawab: ' + jawaban);
+                    $(`#nav-${indexArr}`).removeClass('btn-outline-secondary btn-primary').addClass('btn-success text-white border-success shadow-sm');
+                    $('#label-status-jawab').removeClass('text-secondary bg-secondary').addClass('text-success').css('background-color', '#dcfce7').html('<i class="fas fa-check-circle me-1"></i> Terdijawab: ' + jawaban);
                 },
                 error: function() {
-                    alert("Koneksi terputus! Gagal menyimpan jawaban. Periksa koneksi internet Anda.");
-                    $('.opsi-jawaban').removeClass('terpilih'); // Batalkan visual
+                    alert("Koneksi terputus! Gagal menyimpan jawaban.");
+                    $('.opsi-jawaban').removeClass('terpilih'); 
                 }
             });
         }
 
-        // 6. Timer Hitung Mundur Server
-        function mulaiTimer() {
-            let x = setInterval(function() {
-                let sekarang = new Date().getTime();
-                let jarak = waktuSelesai - sekarang;
-
-                if (jarak < 0) {
-                    clearInterval(x);
-                    $('#timer-ujian').text("WAKTU HABIS");
-                    alert('Waktu Ujian Telah Habis! Sistem akan mengunci dan menyimpan pekerjaan Anda.');
-                    triggerSelesai();
-                    return;
-                }
-
-                let jam = Math.floor((jarak % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                let menit = Math.floor((jarak % (1000 * 60 * 60)) / (1000 * 60));
-                let detik = Math.floor((jarak % (1000 * 60)) / 1000);
-
-                $('#timer-ujian').text(
-                    (jam < 10 ? "0" + jam : jam) + ":" + 
-                    (menit < 10 ? "0" + menit : menit) + ":" + 
-                    (detik < 10 ? "0" + detik : detik)
-                );
-                
-                // Peringatan merah jika kurang dari 5 menit
-                if (jarak < 300000) {
-                    $('#timer-ujian').removeClass('text-danger').addClass('text-warning blink');
-                }
-            }, 1000);
-        }
-
-        // 7. Akhiri Ujian CBT Manual
-        function akhiriCBT() {
-            // Cek apakah ada yang belum dijawab
-            let belumDijawab = dataSoal.filter(s => s.jawaban_siswa == null).length;
-            let pesan = belumDijawab > 0 
-                ? `Masih ada ${belumDijawab} soal yang BELUM DIJAWAB! Yakin ingin mengakhiri ujian sekarang?`
-                : `Semua soal telah dijawab. Yakin ingin mengumpulkan dan mengakhiri ujian?`;
-            
-            if(confirm(pesan)) {
-                window.onbeforeunload = null;
-                document.getElementById('form-selesai-cbt').submit();
-            }
-        }
-    @endif
-    @endif
-</script>
-
-<script>
-   
-    // 4. Hitung mundur setiap 1 detik
-        let durasiMenit = {{ $ujian->durasi }}; 
-        let ujianId = {{ $ujian->id }};
-        let batasTutupSistem = new Date("{{ \Carbon\Carbon::parse($ujian->waktu_selesai)->format('Y-m-d\TH:i:s') }}").getTime();
-        let storageKey = "waktu_selesai_ujian_" + ujianId;
-
-        @if($jumlah_jawaban == 0)
-        localStorage.removeItem(storageKey);
-        @endif
-
-        // 2. Buat kunci memori khusus untuk ujian ini
-        let waktuSelesaiTarget = localStorage.getItem(storageKey);
-        
-        // Jika siswa baru pertama kali klik "Kerjakan" (belum ada memori)
-                // 6. Timer Hitung Mundur Server (Versi Smart Duration)
         function mulaiTimer() {
             let waktuSelesaiTarget = localStorage.getItem(storageKey);
             
-            // Jika siswa baru pertama kali klik "Kerjakan" (belum ada memori)
             if (!waktuSelesaiTarget) {
                 let waktuSekarang = new Date().getTime();
                 waktuSelesaiTarget = waktuSekarang + (durasiMenit * 60 * 1000);
                 
-                // Jika jatah durasi siswa melewati jam tutup ujian, paksa gunakan jam tutup
                 if (waktuSelesaiTarget > batasTutupSistem) {
                     waktuSelesaiTarget = batasTutupSistem;
                 }
@@ -481,7 +533,7 @@
 
                 if (jarak < 0) {
                     clearInterval(x);
-                    localStorage.removeItem(storageKey); // Bersihkan memori browser
+                    localStorage.removeItem(storageKey);
                     $('#timer-ujian').text("00:00:00");
                     alert('Waktu Ujian Telah Habis! Sistem akan mengunci dan menyimpan pekerjaan Anda.');
                     triggerSelesai();
@@ -498,22 +550,28 @@
                     (detik < 10 ? "0" + detik : detik)
                 );
                 
-                // Peringatan merah berkedip jika kurang dari 5 menit
                 if (jarak < 300000) {
-                    $('#timer-ujian').removeClass('text-danger').addClass('text-warning blink');
+                    $('#timer-ujian').addClass('text-danger blink');
                 }
             }, 1000);
         }
+
+        function akhiriCBT() {
+            let belumDijawab = dataSoal.filter(s => s.jawaban_siswa == null).length;
+            let pesan = belumDijawab > 0 
+                ? `Masih ada ${belumDijawab} soal yang BELUM DIJAWAB! Yakin ingin mengakhiri ujian sekarang?`
+                : `Semua soal telah dijawab. Yakin ingin mengumpulkan dan mengakhiri ujian?`;
+            
+            if(confirm(pesan)) {
+                window.onbeforeunload = null;
+                document.getElementById('form-selesai-cbt').submit();
+            }
+        }
+    @endif
+    @endif
 </script>
 
-<!-- Form Tersembunyi untuk Akhiri Ujian CBT -->
-<form id="form-selesai-cbt" action="{{ route('siswa.ujian.selesai', $ujian->id) }}" method="POST" style="display: none;">
-    @csrf
-    <input type="hidden" name="pelanggaran" id="input-pelanggaran-cbt" value="0">
-</form>
-
-<!-- Form Tersembunyi untuk Akhiri Ujian G-Form -->
-@if(session()->has('ujian_verified_' . $ujian->id) && $ujian->metode_ujian == 'gform')
+@if(session()->has('ujian_verified_' . $ujian->id) &&$ujian->metode_ujian == 'gform')
 <form id="form-auto-selesai" action="{{ route('siswa.ujian.selesai', $ujian->id) }}" method="POST" style="display: none;">
     @csrf
     <input type="hidden" name="pelanggaran" id="input-pelanggaran-gform" value="0">

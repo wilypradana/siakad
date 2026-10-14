@@ -14,7 +14,6 @@
             
             <div class="mb-4">
                 <label class="fw-bold mb-2">Pertanyaan Soal</label>
-                <!-- Menampilkan nilai lama ke dalam textarea -->
                 <textarea name="pertanyaan" id="summernote" class="form-control">{!! $soal->pertanyaan !!}</textarea>
                 <small class="text-muted"><i class="fas fa-info-circle"></i> Gunakan Text Editor (seperti Summernote/CKEditor) jika sudah dipasang, atau gunakan tag HTML <b>&lt;b&gt;tebal&lt;/b&gt;</b>, <i>&lt;i&gt;miring&lt;/i&gt;</i>, <u>&lt;u&gt;garis bawah&lt;/u&gt;</u> manual.</small>
             </div>
@@ -29,6 +28,11 @@
                 @endif
                 <input type="file" name="gambar" class="form-control" accept="image/*">
                 <small class="text-muted">Biarkan kosong jika tidak ingin mengubah gambar.</small>
+            </div>
+
+            <!-- Tambahan Tips Gambar -->
+            <div class="alert alert-info py-2 small mb-3">
+                <i class="fas fa-info-circle me-1"></i> <b>Tips:</b> Jika jawaban berupa gambar, Anda cukup mengetik nama file gambarnya (misal: <code>opsi_a.png</code>) di dalam form opsi di bawah ini.
             </div>
 
             <div class="row">
@@ -84,7 +88,7 @@
         $('#summernote').summernote({
             placeholder: 'Ketikkan pertanyaan soal di sini...',
             tabsize: 2,
-            height: 250, // Tinggi kolom editor
+            height: 250,
             toolbar: [
                 ['font', ['bold', 'italic', 'underline', 'clear']],
                 ['para', ['ul', 'ol', 'paragraph']],

@@ -89,9 +89,22 @@
         </div>
     </div>
 </div>
+
 @if(session('success'))
     <div class="alert alert-success"><i class="fas fa-check-circle me-1"></i> {{ session('success') }}</div>
 @endif
+
+@php
+    // Fungsi bantuan untuk mendeteksi apakah nilai teks opsi adalah ekstensi gambar (untuk list tabel)
+    $formatOpsi = function($teks) {
+        if (!$teks) return '';
+        $teks = trim($teks);
+        if (preg_match('/\.(jpg|jpeg|png|gif|webp)$/i', $teks)) {
+            return '<br><img src="'.asset('uploads/soal/'.$teks).'" class="img-fluid rounded border shadow-sm mt-1" style="max-height: 60px; object-fit: contain;">';
+        }
+        return $teks;
+    };
+@endphp
 
 <div class="card shadow-sm border-0" style="border-radius: 15px;">
     <div class="card-body p-0">
@@ -118,12 +131,13 @@
                         </td>
                         <td>
                             <ul class="list-unstyled mb-0 small">
-                                <li class="{{ $soal->kunci_jawaban == 'A' ? 'text-success fw-bold' : '' }}">A. {{ $soal->opsi_a }} {!! $soal->kunci_jawaban == 'A' ? '<i class="fas fa-check-circle"></i>' : '' !!}</li>
-                                <li class="{{ $soal->kunci_jawaban == 'B' ? 'text-success fw-bold' : '' }}">B. {{ $soal->opsi_b }} {!! $soal->kunci_jawaban == 'B' ? '<i class="fas fa-check-circle"></i>' : '' !!}</li>
-                                <li class="{{ $soal->kunci_jawaban == 'C' ? 'text-success fw-bold' : '' }}">C. {{ $soal->opsi_c }} {!! $soal->kunci_jawaban == 'C' ? '<i class="fas fa-check-circle"></i>' : '' !!}</li>
-                                <li class="{{ $soal->kunci_jawaban == 'D' ? 'text-success fw-bold' : '' }}">D. {{ $soal->opsi_d }} {!! $soal->kunci_jawaban == 'D' ? '<i class="fas fa-check-circle"></i>' : '' !!}</li>
+                                <!-- Penerapan formatOpsi() agar otomatis me-render img tag jika itu nama file -->
+                                <li class="{{ $soal->kunci_jawaban == 'A' ? 'text-success fw-bold' : '' }}">A. {!! $formatOpsi($soal->opsi_a) !!} {!! $soal->kunci_jawaban == 'A' ? '<i class="fas fa-check-circle"></i>' : '' !!}</li>
+                                <li class="{{ $soal->kunci_jawaban == 'B' ? 'text-success fw-bold' : '' }}">B. {!! $formatOpsi($soal->opsi_b) !!} {!! $soal->kunci_jawaban == 'B' ? '<i class="fas fa-check-circle"></i>' : '' !!}</li>
+                                <li class="{{ $soal->kunci_jawaban == 'C' ? 'text-success fw-bold' : '' }}">C. {!! $formatOpsi($soal->opsi_c) !!} {!! $soal->kunci_jawaban == 'C' ? '<i class="fas fa-check-circle"></i>' : '' !!}</li>
+                                <li class="{{ $soal->kunci_jawaban == 'D' ? 'text-success fw-bold' : '' }}">D. {!! $formatOpsi($soal->opsi_d) !!} {!! $soal->kunci_jawaban == 'D' ? '<i class="fas fa-check-circle"></i>' : '' !!}</li>
                                 @if($soal->opsi_e)
-                                <li class="{{ $soal->kunci_jawaban == 'E' ? 'text-success fw-bold' : '' }}">E. {{ $soal->opsi_e }} {!! $soal->kunci_jawaban == 'E' ? '<i class="fas fa-check-circle"></i>' : '' !!}</li>
+                                <li class="{{ $soal->kunci_jawaban == 'E' ? 'text-success fw-bold' : '' }}">E. {!! $formatOpsi($soal->opsi_e) !!} {!! $soal->kunci_jawaban == 'E' ? '<i class="fas fa-check-circle"></i>' : '' !!}</li>
                                 @endif
                             </ul>
                         </td>

@@ -25,7 +25,14 @@
             </div>
 
             <hr class="mb-4">
-            <h5 class="fw-bold mb-3 text-secondary"><i class="fas fa-list-ol me-2"></i>Pilihan Jawaban</h5>
+            <div class="d-flex justify-content-between align-items-end mb-3">
+                <h5 class="fw-bold text-secondary mb-0"><i class="fas fa-list-ol me-2"></i>Pilihan Jawaban</h5>
+            </div>
+            
+            <!-- Tambahan Tips Gambar -->
+            <div class="alert alert-info py-2 small">
+                <i class="fas fa-info-circle me-1"></i> <b>Tips:</b> Jika pilihan jawaban berupa gambar, Anda cukup mengetikkan <b>nama file gambarnya beserta ekstensi</b> (contoh: <code>grafik_a.png</code>) di kolom opsi. Pastikan file gambar tersebut telah ter-upload di folder server.
+            </div>
             
             <div class="row bg-light p-3 rounded mb-4">
                 <div class="col-md-6 mb-3">

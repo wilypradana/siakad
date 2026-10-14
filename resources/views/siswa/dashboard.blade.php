@@ -46,32 +46,30 @@
     </div>
 @endif
 
-{{-- GATEKEEPER ADMINISTRASI --}}
+{{-- GATEKEEPER ADMINISTRASI - INFO KARTU DI TU --}}
 @if($siswa)
     <div class="row mb-4">
         <div class="col-12">
             @if($siswa->status_bayar == 1)
                 <div class="alert alert-success shadow-sm border-0 py-3" style="border-radius: 10px;">
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div class="d-flex align-items-center flex-wrap gap-3">
+                        <i class="fas fa-check-circle fa-2x text-success me-2"></i>
                         <div>
-                            <h5 class="fw-bold mb-1"><i class="fas fa-check-circle me-2"></i>Administrasi Lunas</h5>
-                            <p class="mb-1 small">Kartu ujian sudah tersedia. Berikut adalah <b>Kode Unik Login Ujian</b> Anda:</p>
-                            <div class="badge bg-white text-danger border border-danger px-3 py-2 fs-6 fw-bold font-monospace shadow-sm">
-                                <i class="fas fa-key me-1"></i> {{ $siswa->nomor_kartu ?? 'Belum digenerate Admin' }}
-                            </div>
+                            <h5 class="fw-bold mb-1 text-success">Administrasi Lunas!</h5>
+                            <p class="mb-0 small text-dark">
+                                Status pembayaran Anda telah divalidasi. 
+                                <br>Silakan mengambil <b>Kartu Peserta Ujian </b> Anda, yang berisi <b>Kode Unik Ujian</b> di bagian Tata Usaha (TU).
+                            </p>
                         </div>
-                        <a href="{{ route('siswa.cetak_kartu') }}" target="_blank" class="btn btn-success fw-bold shadow-sm px-4 py-2">
-                            <i class="fas fa-print me-2"></i> Cetak Kartu
-                        </a>
                     </div>
                 </div>
             @else
                 <div class="alert alert-warning shadow-sm border-0 py-3" style="border-radius: 10px;">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-money-check-alt fa-2x me-3"></i>
+                        <i class="fas fa-money-check-alt fa-2x text-warning me-3"></i>
                         <div>
-                            <h5 class="fw-bold mb-1">Administrasi Belum Lengkap</h5>
-                            <p class="mb-0 small text-dark">Mohon maaf, Kartu Ujian belum tersedia. Silakan hubungi bagian Tata Usaha Atau Bagian Administrasi.</p>
+                            <h5 class="fw-bold mb-1 text-dark">Administrasi Belum Lengkap</h5>
+                            <p class="mb-0 small text-dark">Mohon maaf, Anda belum menyelesaikan persyaratan administrasi. Silakan segera hubungi bagian <b>Tata Usaha (TU)</b> untuk mendapatkan Kartu Ujian Anda.</p>
                         </div>
                     </div>
                 </div>
@@ -245,6 +243,92 @@
     </div>
 </div>
 
+{{-- TABEL REKAPITULASI KEHADIRAN HARIAN --}}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm border-0 mb-4" style="border-radius: 15px;">
+            <div class="card-header bg-white border-0 pt-4 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold text-dark mb-0">
+                    <i class="fas fa-user-check text-success me-2"></i> Rekap Kehadiran per Mata Pelajaran
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="5%" class="text-center py-3">NO</th>
+                                <th class="py-3">MATA PELAJARAN</th>
+                                <th width="10%" class="text-center py-3">HADIR</th>
+                                <th width="10%" class="text-center py-3">SAKIT</th>
+                                <th width="10%" class="text-center py-3">IZIN</th>
+                                <th width="10%" class="text-center py-3">ALFA</th>
+                                <th width="15%" class="text-center py-3">PERSENTASE</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($mapel_kelas as $index => $mapel)
+                                @php
+                                    // Ambil data absensi harian dari database (sesuaikan kolom mapel_id jika di database Anda bernama jadwal_id atau pembelajaran_id)
+                                    $absen_mapel = \App\Models\AbsensiSiswa::where('siswa_id', $siswa->id)
+                                                        ->where('mapel_id', $mapel->id)
+                                                        ->get();
+                                                        
+                                    // Hitung jumlah masing-masing status (mendukung huruf kapital, huruf kecil, atau inisial H/S/I/A)
+                                    $hadir = $absen_mapel->whereIn('status', ['Hadir', 'hadir', 'H', 'h'])->count();
+                                    $sakit = $absen_mapel->whereIn('status', ['Sakit', 'sakit', 'S', 's'])->count();
+                                    $izin  = $absen_mapel->whereIn('status', ['Izin', 'izin', 'I', 'i'])->count();
+                                    $alfa  = $absen_mapel->whereIn('status', ['Alfa', 'alfa', 'A', 'a', 'Alpha'])->count();
+                                    
+                                    $total_pertemuan = $hadir + $sakit + $izin + $alfa;
+                                    
+                                    // Hitung Persentase Kehadiran
+                                    $persentase = $total_pertemuan > 0 ? round(($hadir / $total_pertemuan) * 100) : 0;
+                                    
+                                    // Warna Bar Persentase
+                                    $bar_color = 'bg-success';
+                                    if($persentase < 75) $bar_color = 'bg-danger';
+                                    elseif($persentase < 90) $bar_color = 'bg-warning';
+                                @endphp
+                                
+                                <tr>
+                                    <td class="text-center">{{ $index + 1 }}</td>
+                                    <td class="fw-bold text-dark">{{ strtoupper($mapel->nama_mapel) }}</td>
+                                    <td class="text-center">
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-1 shadow-sm">{{ $hadir }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-1 shadow-sm">{{ $sakit }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill px-3 py-1 shadow-sm">{{ $izin }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-3 py-1 shadow-sm">{{ $alfa }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        @if($total_pertemuan > 0)
+                                            <div class="progress shadow-sm mb-1" style="height: 8px; border-radius: 10px;">
+                                                <div class="progress-bar {{ $bar_color }}" role="progressbar" style="width: {{ $persentase }}%;" aria-valuenow="{{ $persentase }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                            <small class="fw-bold {{ $bar_color == 'bg-success' ? 'text-success' : ($bar_color == 'bg-danger' ? 'text-danger' : 'text-warning') }}">{{ $persentase }}%</small>
+                                        @else
+                                            <span class="badge bg-light text-muted border px-2 py-1" style="font-size: 0.75rem;">Belum ada data</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7" class="text-center py-4 text-muted">Data mata pelajaran kelas tidak ditemukan.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <style>
     .pulse-button { animation: pulse 2s infinite; }
     @keyframes pulse { 

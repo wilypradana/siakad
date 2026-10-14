@@ -332,7 +332,7 @@
                 
                 <div class="row text-center mt-2">
                     <div class="col-12">
-                        <p class="mb-4">Mengetahui,<br>Kepala Sekolah</p>
+                        <p class="mb-5">Mengetahui,<br>Kepala Sekolah</p>
                         <p class="mb-0 fw-bold text-decoration-underline">
                             <span contenteditable="true" class="editable-sync edit-kepsek" title="Klik untuk mengetik Nama Kepala Sekolah">{{ $nama_kepsek }}</span>
                         </p>
