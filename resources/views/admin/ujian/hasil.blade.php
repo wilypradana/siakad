@@ -104,7 +104,7 @@
                         <th width="35%" class="py-3 text-start">Nama Siswa</th>
                         <th width="10%" class="py-3 text-success">Benar</th>
                         <th width="10%" class="py-3 text-danger">Salah</th>
-                        <th width="10%" class="py-3 text-primary fs-5">Nilai Akhir</th>
+                        <th width="10%" class="py-3 text-primary">Nilai Akhir</th>
                         <th width="15%" class="py-3">Status</th>
                     </tr>
                 </thead>
@@ -122,7 +122,7 @@
                             @if($data_hasil)
                                 <td class="text-success fw-bold">{{ $data_hasil->jumlah_benar }}</td>
                                 <td class="text-danger fw-bold">{{ $data_hasil->jumlah_salah }}</td>
-                                <td class="text-primary fw-bold fs-5">{{ $data_hasil->nilai_akhir }}</td>
+                                <td class="text-primary fw-bold">{{ $data_hasil->nilai_akhir }}</td>
                                 <td><span class="badge bg-success"><i class="fas fa-check me-1"></i> Selesai</span></td>
                             @else
                                 <td class="text-muted">-</td>

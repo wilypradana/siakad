@@ -5,7 +5,7 @@ use App\Http\Controllers\{
     AuthController, AdminController, GuruController, SiswaController, 
     MapelController, JadwalController, KelasController, NilaiController, 
     UjianController, PortalGuruController, WaliKelasController, PortalSiswaController, 
-    PembelajaranController, SoalController,
+    PembelajaranController, SoalController, 
 };
 
 // --- AUTH ---
@@ -66,7 +66,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::put('/jadwal/{id}', [JadwalController::class, 'update'])->name('jadwal.update');
     Route::delete('/jadwal/{id}', [JadwalController::class, 'destroy'])->name('jadwal.destroy');
 
-
     // Set Pembelajaran
     Route::get('/pembelajaran', [PembelajaranController::class, 'index'])->name('pembelajaran.index');
     Route::post('/pembelajaran/simpan', [PembelajaranController::class, 'storeMassal'])->name('pembelajaran.storeMassal');
@@ -101,14 +100,11 @@ Route::middleware(['auth', 'role:admin,guru'])->group(function () {
         Route::put('/{id}/update', [UjianController::class, 'update'])->name('ujian.update');
         Route::delete('/{id}/destroy', [UjianController::class, 'destroy'])->name('ujian.destroy');
         Route::post('/{id}/reset-siswa', [UjianController::class, 'resetStatusUjian'])->name('ujian.reset_siswa');
-        // --- LETAKKAN RUTE GET TOGGLE STATUS DI SINI ---
         Route::get('/{id}/toggle-status', [UjianController::class, 'toggleStatus'])->name('ujian.toggle_status');
-        // Letakkan di bawah rute bulk-delete yang sudah ada
         Route::post('/bulk-delete', [UjianController::class, 'bulkDelete'])->name('ujian.bulkDelete');
         Route::post('/bulk-toggle', [UjianController::class, 'bulkToggle'])->name('ujian.bulkToggle');
-
     });
-    // Pindahkan kedua rute ini ke BAWAH penutup tersebut
+    
     Route::post('/admin/ujian/{id}/reset-semua', [App\Http\Controllers\UjianController::class, 'resetSemua'])->name('admin.ujian.reset_semua');
     Route::post('/admin/ujian/{id}/tutup-paksa', [App\Http\Controllers\UjianController::class, 'tutupPaksa'])->name('admin.ujian.tutup_paksa');
 
@@ -117,13 +113,9 @@ Route::middleware(['auth', 'role:admin,guru'])->group(function () {
     Route::get('/admin/ujian/{ujian_id}/soal/create', [SoalController::class, 'create'])->name('admin.soal.create');
     Route::post('/admin/ujian/{ujian_id}/soal', [SoalController::class, 'store'])->name('admin.soal.store');
     Route::delete('/admin/ujian/{ujian_id}/soal/{soal_id}', [SoalController::class, 'destroy'])->name('admin.soal.destroy');
-    // TAMBAHKAN RUTE INI UNTUK REKAP NILAI CBT
     Route::get('/admin/ujian/{ujian_id}/hasil', [UjianController::class, 'hasilUjian'])->name('admin.ujian.hasil');
-    // TAMBAHKAN RUTE INI UNTUK SALIN SOAL
     Route::post('/admin/ujian/{ujian_id}/soal/import', [SoalController::class, 'importSoal'])->name('admin.soal.import');
-    // Rute untuk menampilkan halaman form edit
     Route::get('/admin/soal/{id}/edit', [SoalController::class, 'edit'])->name('admin.soal.edit');
-    // Rute untuk memproses penyimpanan data yang diedit
     Route::put('/admin/soal/{id}', [SoalController::class, 'update'])->name('admin.soal.update');
 
     // Rute Upload Excel
@@ -148,12 +140,8 @@ Route::middleware(['auth', 'role:admin,guru'])->group(function () {
         Route::post('/rapor/catatan/simpan', [WaliKelasController::class, 'simpanCatatan'])->name('wali.simpan_catatan');
         
         Route::get('/rapor/catatan/get-data', [WaliKelasController::class, 'getCatatan'])->name('wali.get_catatan');
-        // Rute untuk input catatan massal
         Route::get('/rapor/catatan/input-massal', [WaliKelasController::class, 'inputCatatanMassal'])->name('wali.input_catatan_massal');
         Route::post('/rapor/catatan/simpan-massal', [WaliKelasController::class, 'simpanCatatanMassal'])->name('wali.simpan_catatan_massal');
-
-        // Rute Modul Ekstrakurikuler & Prestasi
-        // Rute Modul Ekstrakurikuler & Prestasi (Massal)
         Route::get('/rapor/ekskul-prestasi-massal', [WaliKelasController::class, 'ekskulPrestasiMassal'])->name('wali.ekskul_prestasi_massal');
         Route::post('/rapor/ekskul-prestasi-massal', [WaliKelasController::class, 'simpanEkskulPrestasiMassal'])->name('wali.simpan_ekskul_prestasi_massal');
     });
@@ -167,8 +155,30 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
     Route::post('/ujian/{id}/simpan', [PortalSiswaController::class, 'simpanJawaban'])->name('siswa.ujian.simpan');
     Route::post('/ujian/{id}/verifikasi', [PortalSiswaController::class, 'verifikasiKode'])->name('siswa.ujian.verifikasi');
     Route::post('/siswa/ujian/{id}/selesai', [PortalSiswaController::class, 'selesaiUjian'])->name('siswa.ujian.selesai');
-    // API untuk ujian CBT Lokal
     Route::get('/ujian/{id}/get-soal', [PortalSiswaController::class, 'getSoalCBT'])->name('siswa.ujian.get_soal');
     Route::post('/ujian/{id}/simpan-jawaban', [PortalSiswaController::class, 'simpanJawabanCBT'])->name('siswa.ujian.simpan_jawaban');
+});
 
-    });
+// ==========================================
+// MODUL E-LEARNING (TAMBAHAN TANPA MENGHAPUS RUTE LAMA)
+// ==========================================
+
+Route::middleware(['auth', 'role:admin,guru'])->prefix('guru/elearning')->name('guru.elearning.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Guru\ElearningController::class, 'index'])->name('index');
+    Route::get('/materi/create/{mapel_id}', [\App\Http\Controllers\Guru\ElearningController::class, 'createMateri'])->name('materi.create');
+    Route::post('/materi/store/{mapel_id}', [\App\Http\Controllers\Guru\ElearningController::class, 'storeMateri'])->name('materi.store');
+    Route::get('/materi/list/{kelas_id}/{mapel_id}', [\App\Http\Controllers\Guru\ElearningController::class, 'listMateri'])->name('materi.list');
+    Route::get('/materi/edit/{id}', [\App\Http\Controllers\Guru\ElearningController::class, 'editMateri'])->name('materi.edit');
+    Route::put('/materi/update/{id}', [\App\Http\Controllers\Guru\ElearningController::class, 'updateMateri'])->name('materi.update');
+    Route::delete('/materi/delete/{id}', [\App\Http\Controllers\Guru\ElearningController::class, 'destroyMateri'])->name('materi.destroy');
+    Route::get('/materi/rekap/{id}', [\App\Http\Controllers\Guru\ElearningController::class, 'rekapMateri'])->name('materi.rekap');
+    Route::get('/materi/rekap-kelas/{kelas_id}/{mapel_id}', [\App\Http\Controllers\Guru\ElearningController::class, 'rekapKelas'])->name('materi.rekap_kelas');
+    Route::get('/materi/tugas/cek/{id}', [\App\Http\Controllers\Guru\ElearningController::class, 'cekTugas'])->name('materi.cek_tugas');
+});
+
+Route::middleware(['auth', 'role:siswa'])->prefix('siswa/elearning')->name('siswa.elearning.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Siswa\ElearningController::class, 'index'])->name('index');
+    Route::get('/mapel/{mapel_id}', [\App\Http\Controllers\Siswa\ElearningController::class, 'listMateri'])->name('materi.list');
+    Route::get('/materi/{id}', [\App\Http\Controllers\Siswa\ElearningController::class, 'show'])->name('show');
+    Route::post('/materi/submit/{materi_id}', [\App\Http\Controllers\Siswa\ElearningController::class, 'submitTugas'])->name('materi.submit');
+});
