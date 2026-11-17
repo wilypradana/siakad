@@ -107,7 +107,7 @@ Route::middleware(['auth', 'role:admin,guru'])->group(function () {
     
     Route::post('/admin/ujian/{id}/reset-semua', [App\Http\Controllers\UjianController::class, 'resetSemua'])->name('admin.ujian.reset_semua');
     Route::post('/admin/ujian/{id}/tutup-paksa', [App\Http\Controllers\UjianController::class, 'tutupPaksa'])->name('admin.ujian.tutup_paksa');
-
+    Route::post('/admin/ujian/{id}/sync-rapor', [App\Http\Controllers\UjianController::class, 'syncNilaiRapor'])->name('admin.ujian.sync_rapor');
     // MANAJEMEN SOAL (Di luar prefix aksi-ujian, tapi tetap di dalam middleware)
     Route::get('/admin/ujian/{ujian_id}/soal', [SoalController::class, 'index'])->name('admin.soal.index');
     Route::get('/admin/ujian/{ujian_id}/soal/create', [SoalController::class, 'create'])->name('admin.soal.create');

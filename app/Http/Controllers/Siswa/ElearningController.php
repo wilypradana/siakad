@@ -4,13 +4,15 @@ namespace App\Http\Controllers\Siswa;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Pembelajaran; // Mengambil jadwal mapel berdasarkan kelas
+use App\Models\Pembelajaran;
 use App\Models\Materi;
+use App\Models\MateriLog;
+use App\Models\PengumpulanTugas;
 use Illuminate\Support\Facades\Auth;
 
 class ElearningController extends Controller
 {
-    // 1. Menampilkan Daftar Mata Pelajaran yang dipelajari oleh Kelas Siswa
+    // 1. Menampilkan Daftar Mata Pelajaran dengan Indikator Notifikasi Materi/Tugas Baru
     public function index()
     {
         if (!Auth::user()->siswa) {
@@ -20,17 +22,39 @@ class ElearningController extends Controller
         $siswa = Auth::user()->siswa;
         $kelas_id = $siswa->kelas_id;
 
-        // OPSI: Ambil hanya mapel yang sudah memiliki materi/tugas yang diunggah oleh guru untuk kelas ini,
-        // atau ambil dari tabel pembelajaran yang spesifik.
-        $mapel_ids_dengan_materi = Materi::where('kelas_id', $kelas_id)->pluck('mapel_id')->unique();
+        // Ambil seluruh materi/tugas untuk kelas siswa ini
+        $semua_materi = Materi::where('kelas_id', $kelas_id)->get();
 
-        // Ambil jadwal/pembelajaran berdasarkan mapel yang aktif memiliki materi, 
-        // atau jika ingin menampilkan semua jadwal mapel kelas tapi disaring:
+        // Ambil daftar ID materi yang sudah pernah dibuka oleh siswa ini
+        $materi_sudah_dibaca = MateriLog::where('siswa_id', $siswa->id)
+                                ->pluck('materi_id')
+                                ->toArray();
+
+        // Ambil daftar ID tugas yang sudah dikumpulkan oleh siswa ini
+        $tugas_sudah_dikumpul = PengumpulanTugas::where('siswa_id', $siswa->id)
+                                ->pluck('tugas_id')
+                                ->toArray();
+
+        // Hitung jumlah materi baru & tugas belum dikerjakan per mapel_id
+        $notif_per_mapel = [];
+        foreach ($semua_materi->groupBy('mapel_id') as $mapel_id => $items) {
+            $belum_dibaca = $items->whereNotIn('id', $materi_sudah_dibaca)->count();
+            $tugas_pending = $items->where('is_tugas', 1)
+                                   ->whereNotIn('id', $tugas_sudah_dikumpul)
+                                   ->count();
+
+            $notif_per_mapel[$mapel_id] = [
+                'belum_dibaca'  => $belum_dibaca,
+                'tugas_pending' => $tugas_pending,
+                'total_notif'   => max($belum_dibaca, $tugas_pending), // Memastikan tetap menyala jika tugas belum dikumpul
+            ];
+        }
+
         $jadwal_mapel = Pembelajaran::with(['mapel', 'guru'])
                             ->where('kelas_id', $kelas_id)
                             ->get();
 
-        return view('siswa.elearning.index', compact('jadwal_mapel', 'siswa'));
+        return view('siswa.elearning.index', compact('jadwal_mapel', 'siswa', 'notif_per_mapel'));
     }
 
     // 2. Menampilkan Daftar Materi Berdasarkan Mapel Tertentu di Kelas Siswa
@@ -41,7 +65,6 @@ class ElearningController extends Controller
 
         $mapel = \App\Models\Mapel::findOrFail($mapel_id);
 
-        // Ambil materi untuk mapel dan kelas tersebut
         $materis = Materi::with(['guru'])
                     ->where('kelas_id', $kelas_id)
                     ->where('mapel_id', $mapel_id)
@@ -51,16 +74,14 @@ class ElearningController extends Controller
         return view('siswa.elearning.list_materi', compact('materis', 'mapel', 'kelas_id'));
     }
 
-    // 3. Halaman Detail Materi
     // 3. Halaman Detail Materi & Auto-Log Kehadiran Membaca
     public function show($id)
     {
         $materi = Materi::with(['guru', 'mapel'])->findOrFail($id);
         $siswa = Auth::user()->siswa;
 
-        // Cek apakah siswa ini sudah pernah tercatat membaca materi ini
         if ($siswa) {
-            \App\Models\MateriLog::firstOrCreate(
+            MateriLog::firstOrCreate(
                 [
                     'materi_id' => $materi->id,
                     'siswa_id' => $siswa->id,
@@ -88,7 +109,7 @@ class ElearningController extends Controller
             abort(403, 'Akses Ditolak.');
         }
 
-        \App\Models\PengumpulanTugas::updateOrCreate(
+        PengumpulanTugas::updateOrCreate(
             [
                 'tugas_id' => $materi_id,
                 'siswa_id' => $siswa->id,

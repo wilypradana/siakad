@@ -304,4 +304,52 @@ $total_soal = $ujian->soals()->count();
 
         return back()->with('success', "Ujian berhasil ditutup paksa! Sebanyak $hitung_ditutup siswa yang masih terjebak/belum klik Selesai telah dinilai secara otomatis.");
     }
+
+    public function syncNilaiRapor($id)
+    {
+        $ujian = \App\Models\Ujian::findOrFail($id);
+        $hasilUjian = \App\Models\HasilUjian::where('ujian_id', $id)->get();
+
+        if ($hasilUjian->isEmpty()) {
+            return back()->with('error', 'Belum ada nilai ujian yang selesai dikerjakan untuk disinkronkan.');
+        }
+
+        $jumlahTersinkron = 0;
+
+        foreach ($hasilUjian as $hasil) {
+            // Cari data nilai rapor yang mungkin sudah diisi TP-nya oleh guru
+            $nilaiExisting = \App\Models\Nilai::where('siswa_id', $hasil->siswa_id)
+                ->where('mapel_id', $ujian->mapel_id)
+                ->where('jenis_ujian_id', $ujian->jenis_ujian_id)
+                ->first();
+
+            $s1 = $nilaiExisting->sumatif_1 ?? 0;
+            $s2 = $nilaiExisting->sumatif_2 ?? 0;
+            $s3 = $nilaiExisting->sumatif_3 ?? 0;
+            $nilaiUjianBaru = $hasil->nilai_akhir;
+
+            // Hitung ulang Nilai Akhir Rapor sesuai rumus Kurikulum Merdeka
+            $rataSumatif = ($s1 + $s2 + $s3) / 3;
+            $nilaiAkhirRapor = round(($rataSumatif + $nilaiUjianBaru) / 2);
+
+            \App\Models\Nilai::updateOrCreate(
+                [
+                    'siswa_id'       => $hasil->siswa_id,
+                    'mapel_id'       => $ujian->mapel_id,
+                    'jenis_ujian_id' => $ujian->jenis_ujian_id,
+                ],
+                [
+                    'sumatif_1'   => $s1,
+                    'sumatif_2'   => $s2,
+                    'sumatif_3'   => $s3,
+                    'nilai_ujian' => $nilaiUjianBaru,
+                    'nilai_akhir' => $nilaiAkhirRapor,
+                ]
+            );
+
+            $jumlahTersinkron++;
+        }
+
+        return back()->with('success', "Berhasil menyinkronkan {$jumlahTersinkron} nilai siswa ke kolom Nilai Ujian (Rapor)!");
+    }
 }
