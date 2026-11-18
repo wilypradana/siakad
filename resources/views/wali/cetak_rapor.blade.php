@@ -34,6 +34,16 @@
     .signature-section p { font-size: 1em !important; line-height: 1.2 !important; }
     .signature-section .mb-5 { margin-bottom: 4em !important; }
     .signature-section .row.text-center.mt-3 { margin-top: 0.5em !important; }
+        .capaian-box {
+        background: transparent;
+        border: none;
+        padding: 0;
+        min-height: 20px;
+        outline: none;
+    }
+    .capaian-box:focus {
+        background-color: #fff9db;
+    }
 
     .editable-date { border-bottom: 1px dashed #000; padding: 0 4px; cursor: pointer; background-color: #fff9db; }
 
@@ -109,116 +119,82 @@
         </tr>
     </thead>
 
-   <tbody>
-    @php
-        $no = 1;
-        $mapel_ids_kelas = \Illuminate\Support\Facades\DB::table('pembelajarans')
-            ->where('kelas_id', $siswa->kelas_id)->pluck('mapel_id')->filter()->unique()->values()->toArray();
+    <tbody>
+        @php
+            $no = 1;
+            $mapel_ids_kelas = \Illuminate\Support\Facades\DB::table('pembelajarans')
+                ->where('kelas_id', $siswa->kelas_id)->pluck('mapel_id')->filter()->unique()->values()->toArray();
 
-        if (empty($mapel_ids_kelas)) {
-            $mapel_ids_kelas = \App\Models\Ujian::where('kelas_id', $siswa->kelas_id)
-                ->pluck('mapel_id')->filter()->unique()->values()->toArray();
-        }
+            if (empty($mapel_ids_kelas)) {
+                $mapel_ids_kelas = \App\Models\Ujian::where('kelas_id', $siswa->kelas_id)
+                    ->pluck('mapel_id')->filter()->unique()->values()->toArray();
+            }
 
-        $semua_mapel = \App\Models\Mapel::whereIn('id', $mapel_ids_kelas)->orderBy('id', 'asc')->get();
-        
-        $kelompokUmum = $semua_mapel->filter(function ($m) { return strtolower(trim($m->kelompok ?? '')) === 'umum'; });
-        $kelompokKejuruan = $semua_mapel->filter(function ($m) { return strtolower(trim($m->kelompok ?? '')) === 'kejuruan'; });
-        $kelompokMulok = $semua_mapel->filter(function ($m) { return in_array(strtolower(trim($m->kelompok ?? '')), ['mulok', 'muatan lokal', 'muatan local', 'lokal']); });
-    @endphp
+            $semua_mapel = \App\Models\Mapel::whereIn('id', $mapel_ids_kelas)->orderBy('id', 'asc')->get();
 
-    {{-- ================= UMUM ================= --}}
-    @if($kelompokUmum->isNotEmpty())
-        <tr class="bg-group"><td colspan="{{ $is_sts_rapor ? 3 : 4 }}">Kelompok Mata Pelajaran Umum</td></tr>
-        @foreach($kelompokUmum as $mapel)
-            @php $nilai = $data_nilai->firstWhere('mapel_id', $mapel->id); @endphp
-            <tr>
-                <td class="text-center">{{ $no++ }}</td>
-                <td class="fw-semibold">{{ ucwords(strtolower($mapel->nama_mapel)) }}</td>
-                <td class="text-center fw-bold fs-6 {{ !$nilai ? 'text-danger' : '' }}">
-                    {{ $nilai ? ($is_sts_rapor ? $nilai->nilai_ujian : $nilai->nilai_akhir) : '-' }}
-                </td>
-                @if(!$is_sts_rapor)
-                    <td style="font-size: 0.8rem; padding: 6px;">
-                        @if($nilai)
-                            <div contenteditable="true" class="editable-date" style="background: transparent; border: none; padding: 0; min-height: 20px;" title="Klik untuk mengedit capaian">
-                                @if(!empty($nilai->deskripsi_tercapai) || !empty($nilai->deskripsi_peningkatan))
-                                    {{ $nilai->deskripsi_tercapai ? 'Menunjukkan penguasaan yang baik dalam kompetensi ' . $nilai->deskripsi_tercapai . '. ' : '' }}
-                                    {{ $nilai->deskripsi_peningkatan ? 'Perlu bimbingan dalam kompetensi ' . $nilai->deskripsi_peningkatan . '.' : '' }}
+            $kelompok = [
+                'Kelompok Mata Pelajaran Umum' => $semua_mapel->filter(fn($m) => strtolower(trim($m->kelompok ?? '')) === 'umum'),
+                'Kelompok Mata Pelajaran Kejuruan' => $semua_mapel->filter(fn($m) => strtolower(trim($m->kelompok ?? '')) === 'kejuruan'),
+                'Kelompok Mata Pelajaran Muatan Lokal' => $semua_mapel->filter(fn($m) => in_array(strtolower(trim($m->kelompok ?? '')), ['mulok', 'muatan lokal', 'muatan local', 'lokal'])),
+            ];
+        @endphp
+
+        @foreach($kelompok as $judulKelompok => $daftarMapel)
+            @if($daftarMapel->isNotEmpty())
+                <tr class="bg-group"><td colspan="{{ $is_sts_rapor ? 3 : 4 }}">{{ $judulKelompok }}</td></tr>
+                @foreach($daftarMapel as $mapel)
+                    @php $nilai = $data_nilai->firstWhere('mapel_id', $mapel->id); @endphp
+                    <tr>
+                        <td class="text-center">{{ $no++ }}</td>
+                        <td class="fw-semibold">{{ ucwords(strtolower($mapel->nama_mapel)) }}</td>
+                        <td class="text-center fw-bold fs-6 {{ !$nilai ? 'text-danger' : '' }}">
+                            {{ $nilai ? ($is_sts_rapor ? $nilai->nilai_ujian : $nilai->nilai_akhir) : '-' }}
+                        </td>
+                        @if(!$is_sts_rapor)
+                            <td style="font-size: 0.85em; padding: 5px 7px; text-align: left; vertical-align: middle;">
+                                @if($nilai)
+                                    @php
+                                        // Bersihkan titik ganda di akhir kalimat
+                                        $teksTercapai = rtrim(trim($nilai->deskripsi_tercapai ?? ''), '.');
+                                        $teksPeningkatan = rtrim(trim($nilai->deskripsi_peningkatan ?? ''), '.');
+
+                                        // Cek apakah sudah diawali kalimat lengkap dari generator otomatis
+                                        if ($teksTercapai !== '' && !\Illuminate\Support\Str::startsWith(strtolower($teksTercapai), ['menunjukkan', 'peserta didik', 'sangat baik', 'baik dalam'])) {
+                                            $teksTercapai = 'Menunjukkan penguasaan yang baik dalam kompetensi ' . $teksTercapai;
+                                        }
+
+                                        if ($teksPeningkatan !== '' && !\Illuminate\Support\Str::startsWith(strtolower($teksPeningkatan), ['perlu', 'peserta didik', 'pertahankan'])) {
+                                            $teksPeningkatan = 'Perlu bimbingan dalam kompetensi ' . $teksPeningkatan;
+                                        }
+                                    @endphp
+
+                                    <div contenteditable="true" class="capaian-box" title="Klik untuk mengedit capaian">
+                                        @if($teksTercapai !== '' || $teksPeningkatan !== '')
+                                            @if($teksTercapai !== '')
+                                                <div style="margin-bottom: {{ $teksPeningkatan !== '' ? '4px' : '0' }}; line-height: 1.3;">
+                                                    {{ $teksTercapai }}.
+                                                </div>
+                                            @endif
+                                            @if($teksPeningkatan !== '')
+                                                <div style="line-height: 1.3; border-top: {{ $teksTercapai !== '' ? '1px dotted #999' : 'none' }}; padding-top: {{ $teksTercapai !== '' ? '3px' : '0' }};">
+                                                    {{ $teksPeningkatan }}.
+                                                </div>
+                                            @endif
+                                        @else
+                                            <div style="line-height: 1.3;">
+                                                Menunjukkan penguasaan yang baik dalam kompetensi {{ strtolower($mapel->nama_mapel) }}.
+                                            </div>
+                                        @endif
+                                    </div>
                                 @else
-                                    Menunjukkan penguasaan yang baik dalam kompetensi {{ strtolower($mapel->nama_mapel) }}.
+                                    <span class="text-muted fst-italic">Belum dinilai</span>
                                 @endif
-                            </div>
-                        @else
-                            Belum dinilai
+                            </td>
                         @endif
-                    </td>
-                @endif
-            </tr>
+                    </tr>
+                @endforeach
+            @endif
         @endforeach
-    @endif
-
-    {{-- ================= KEJURUAN ================= --}}
-    @if($kelompokKejuruan->isNotEmpty())
-        <tr class="bg-group"><td colspan="{{ $is_sts_rapor ? 3 : 4 }}">Kelompok Mata Pelajaran Kejuruan</td></tr>
-        @foreach($kelompokKejuruan as $mapel)
-            @php $nilai = $data_nilai->firstWhere('mapel_id', $mapel->id); @endphp
-            <tr>
-                <td class="text-center">{{ $no++ }}</td>
-                <td class="fw-semibold">{{ ucwords(strtolower($mapel->nama_mapel)) }}</td>
-                <td class="text-center fw-bold fs-6 {{ !$nilai ? 'text-danger' : '' }}">
-                    {{ $nilai ? ($is_sts_rapor ? $nilai->nilai_ujian : $nilai->nilai_akhir) : '-' }}
-                </td>
-                @if(!$is_sts_rapor)
-                    <td style="font-size: 0.8rem; padding: 6px;">
-                        @if($nilai)
-                            <div contenteditable="true" class="editable-date" style="background: transparent; border: none; padding: 0; min-height: 20px;" title="Klik untuk mengedit capaian">
-                                @if(!empty($nilai->deskripsi_tercapai) || !empty($nilai->deskripsi_peningkatan))
-                                    {{ $nilai->deskripsi_tercapai ? 'Menunjukkan penguasaan yang baik dalam kompetensi ' . $nilai->deskripsi_tercapai . '. ' : '' }}
-                                    {{ $nilai->deskripsi_peningkatan ? 'Perlu bimbingan dalam kompetensi ' . $nilai->deskripsi_peningkatan . '.' : '' }}
-                                @else
-                                    Menunjukkan penguasaan yang baik dalam kompetensi {{ strtolower($mapel->nama_mapel) }}.
-                                @endif
-                            </div>
-                        @else
-                            Belum dinilai
-                        @endif
-                    </td>
-                @endif
-            </tr>
-        @endforeach
-    @endif
-
-    {{-- ================= MUATAN LOKAL ================= --}}
-    @if($kelompokMulok->isNotEmpty())
-        <tr class="bg-group"><td colspan="{{ $is_sts_rapor ? 3 : 4 }}">Kelompok Mata Pelajaran Muatan Lokal</td></tr>
-        @foreach($kelompokMulok as $mapel)
-            @php $nilai = $data_nilai->firstWhere('mapel_id', $mapel->id); @endphp
-            <tr>
-                <td class="text-center">{{ $no++ }}</td>
-                <td class="fw-semibold">{{ ucwords(strtolower($mapel->nama_mapel)) }}</td>
-                <td class="text-center fw-bold fs-6 {{ !$nilai ? 'text-danger' : '' }}">
-                    {{ $nilai ? ($is_sts_rapor ? $nilai->nilai_ujian : $nilai->nilai_akhir) : '-' }}
-                </td>
-                @if(!$is_sts_rapor)
-                    <td style="font-size: 0.8rem; padding: 6px;">
-                        @if($nilai)
-                            <div contenteditable="true" class="editable-date" style="background: transparent; border: none; padding: 0; min-height: 20px;" title="Klik untuk mengedit capaian">
-                                @if(!empty($nilai->deskripsi_tercapai) || !empty($nilai->deskripsi_peningkatan))
-                                    {{ $nilai->deskripsi_tercapai ? 'Menunjukkan penguasaan yang baik dalam kompetensi ' . $nilai->deskripsi_tercapai . '. ' : '' }}
-                                    {{ $nilai->deskripsi_peningkatan ? 'Perlu bimbingan dalam kompetensi ' . $nilai->deskripsi_peningkatan . '.' : '' }}
-                                @else
-                                    Menunjukkan penguasaan yang baik dalam kompetensi {{ strtolower($mapel->nama_mapel) }}.
-                                @endif
-                            </div>
-                        @else
-                            Belum dinilai
-                        @endif
-                    </td>
-                @endif
-            </tr>
-        @endforeach
-    @endif
     </tbody>
     </table>
     </div>
